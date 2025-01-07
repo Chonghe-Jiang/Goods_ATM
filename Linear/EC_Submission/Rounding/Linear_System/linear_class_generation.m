@@ -1,6 +1,7 @@
 function solution = linear_class_generation(A, v, B)
-    %%% ! Given binary matrix - output the solution
-    %%% Todo: consider the problem brought by numerical precision and log(v) -> consider change back to binary for classification
+    %%% Todo: consider the problem brought by numerical precision and log(v) 
+    %%% Todo: consider change back to binary for classification
+    %%% * Given binary matrix - output the solution
     % A: Input matrix with n rows and m columns, entries are either 0 or 1
     % v: Constant matrix with the same size as A
     % B: n by 1 vector

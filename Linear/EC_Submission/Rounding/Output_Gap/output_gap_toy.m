@@ -1,7 +1,7 @@
 clc
 clear
 %%% ! Add path
-addpath('C:\Users\s1155203585\OneDrive - The Chinese University of Hong Kong\Desktop\EG_EXP\Linear\v0_funding_supp\Efficiency');
+addpath('C:\Users\s1155203585\Dropbox\EG_EXP\Linear\EC_Submission\Efficiency');
 n = 10; % number of rows
 m = 10; % number of columns
 
