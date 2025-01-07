@@ -1,7 +1,6 @@
 clc
 clear
-addpath('C:\Users\s1155203585\OneDrive - The Chinese University of Hong Kong\Desktop\EG_EXP\Linear\v0_funding_supp\Efficiency');
-%%% Todo: Unify the data generation process 
+addpath('C:\Users\s1155203585\Dropbox\EG_EXP\Linear\EC_Submission\Efficiency');
 %%% Todo: Consider the machine accuracy - important - whether the current stopping creteria in the inner problem is okay
 %%% * Now the methodology is right and okay
 n = 5;  % Number of rows
@@ -10,14 +9,14 @@ B = ones(n, 1);  % Random B vector
 v = rand(n,m);
 v = v ./ sum(v, 2); 
 
-%%%* Set common parameters
+%%%* Set common parameters for iterative methods
 max_iter = 10000;
 max_iter_adaptive = 4500;
 p_lower = max(v .* B ./ sum(abs(v),2));
 p_upper = norm(B, 1) * ones(1, m);
 mu_lower = log(p_lower);
 mu_upper = log(p_upper);
-delta = 0.3;  %%% Todo: Can change this parameter
+delta = 0.3;  
 epsilon = 0.1;
 sigma = min(exp(mu_lower));
 L = exp(max(mu_upper)) + (sum(B) / delta); 
@@ -25,8 +24,9 @@ L = exp(max(mu_upper)) + (sum(B) / delta);
 %%% * - ini of p0 and mu0
 p0 = linear_init_gd(p_lower,p_upper,sum(B));
 mu0 = log(p0); %
-
 [p_opt_solver, beta_opt, fval_solver, solve_time] = linear_dual_solver(n, m, B, v);
+%%% *　Notice that the solver result is also not accurate 
+
 %%% * To see the solution quality by the solver
 % gap_solution = linear_compute_gap_cheating(v, B, log(p_opt_solver));
 % disp(['Solution gap: ', num2str(gap_solution)]);

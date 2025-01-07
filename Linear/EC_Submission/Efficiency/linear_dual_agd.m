@@ -1,6 +1,4 @@
 function [solution, time, iter, obj_values, dis_agd, convergence] = linear_dual_agd(v, B, mu_0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive)
-    %%% Todo: give a rigorous definition of the phase changing phenomena
-    %%% Todo: choose the best parameter here
     % Input:
     % v - parameter matrix v \in R^{n*m}
     % B - vector B \in R^{n*1}
@@ -30,7 +28,6 @@ function [solution, time, iter, obj_values, dis_agd, convergence] = linear_dual_
     P = @(mu) max(mu_lower, min(mu, mu_upper));
 
     % Initialize the variables and parameters
-    %%% Todo - Initialization problem - solved
     mu = mu_0;
     y = mu_0;
     % q = 0.1; 
@@ -53,8 +50,6 @@ function [solution, time, iter, obj_values, dis_agd, convergence] = linear_dual_
         obj = sum(exp(mu)) + sum(B .* max(log(v)-mu, [], 2)) - fval_solver;
 
         % Compute the smoothing function values
-        % ! Unstable: f_smooth = sum(exp(mu)) + delta * sum(B .* log(sum(exp((log(v) - repmat(mu,n,1)) / delta), 2))); 
-        % ! Solved - New stable one - minus the maximizer
         % * This resolve the function problem
         max_log_v_mu = max(log(v) - repmat(mu, n, 1), [], 2);
         % Rescale the values by subtracting the minimum
@@ -65,8 +60,6 @@ function [solution, time, iter, obj_values, dis_agd, convergence] = linear_dual_
 
         % Compute the final expression
         f_smooth = sum(exp(mu)) + delta * sum(B .* ((max_log_v_mu/delta) + log_sum_exp_term));
-        % ! New stable end
-
 
         % Document some values
         obj_values(iter) = obj;
@@ -99,9 +92,7 @@ function [solution, time, iter, obj_values, dis_agd, convergence] = linear_dual_
         %%% Todo: give a rigorous definition of the phase changing phenomena 
         if adaptive && iter>=100 && abs(f_smooth_values(iter) - f_smooth_values(iter-1)) < 1e-3 &&  abs(f_smooth_values(iter-1) - f_smooth_values(iter-2)) < 1e-3 && abs(f_smooth_values(iter-2) - f_smooth_values(iter-3)) < 1e-3 &&  abs(f_smooth_values(iter-3) - f_smooth_values(iter-4)) < 1e-3
             break;
-        end
-        %%% Todo: Alternative way - doing by gradient stopping
-        
+        end        
         % Update variables
         mu = mu_new;
         y = y_new;
@@ -137,14 +128,8 @@ function [solution, time, iter, obj_values, dis_agd, convergence] = linear_dual_
         ylabel('Iteration Distance');
         title('SAG - Iteration Convergence');
         grid on;
-        %%% Todo - Now we do not have an output for the smoothing function value
-        % subplot(3, 1, 3);
-        % plot(iterations, f_smooth_values, 'LineWidth', 2);
-        % xlabel('Iteration');
-        % ylabel('Smoothed Function Value');
-        % title('Smoothed Function Value Convergence');
-        % grid on;
     end
+    %%% Current Version - No Smoothing Output
     if plot_flag_smooth
         figure;
         iterations = 1:iter;

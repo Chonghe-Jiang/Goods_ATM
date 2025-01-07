@@ -1,5 +1,4 @@
-% Test Program - Simple testing for the iterative method
-%%% Todo - Document all the results in linear case with synthetic data
+%%% EC 2025 Submission
 %%% ! Version: EC - Linear - Sythetic Data - Iterative method
 clc
 clear
@@ -19,9 +18,6 @@ epsilon = 1e-2; % Stopping criteria with epsilon
 plot_flag = true;
 
 %%% * Box constraint  
-%%% ! there is problem inside should be sum(abs(v),2)
-%%% ! Correct version now
-% p_lower = max(v .* B ./ sum(abs(v)));
 p_lower = max(v .* B ./ sum(abs(v),2));
 p_upper = norm(B, 1) * ones(1, m);
 mu_lower = log(p_lower);
@@ -61,7 +57,7 @@ disp(['MD time: ', num2str(time_md), ' seconds']);
 plot_flag = true;
 plot_flag_smooth = false;
 adaptive = false;
-delta_agd = 0.05; %%% ! important parameter here
+delta_agd = 0.05;
 [solution_agd, time_agd, iter_agd, obj_values_agd, dis_agd, convergence_agd] = linear_dual_agd(v, B, mu0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta_agd, plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive);
 disp(['AGD iterations: ', num2str(iter_agd)]);
 disp(['AGD time: ', num2str(time_agd), ' seconds']);
@@ -82,11 +78,12 @@ x_subgrad = 1:length(obj_values_sub);
 x_agd = 1:length(obj_values_agd);
 x_adaptive = 1:length(obj_values_adaptive);
 
+%%% Todo: Output figures -> low precision and high precision
 figure;
 semilogy(x_md, abs(obj_values_md), '-d', 'DisplayName', 'Mirror Descent', 'LineWidth', 2); % Plot obj_mirror
 hold on;
 semilogy(x_subgrad, abs(obj_values_sub), '-d', 'DisplayName', 'Tatonnement', 'LineWidth', 2); % Plot obj_subgrad
-semilogy(x_adaptive, abs(obj_values_adaptive), '-d', 'DisplayName', 'AGD', 'LineWidth', 2);
+semilogy(x_agd, abs(obj_values_agd), '-d', 'DisplayName', 'AGD', 'LineWidth', 2);
 semilogy(x_adaptive, abs(obj_values_adaptive), '-d', 'DisplayName', 'SGA', 'LineWidth', 2);
 hold off;
 
