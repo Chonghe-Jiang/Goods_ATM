@@ -33,11 +33,11 @@ for phase = 1:phase_num
     % Update delta and L
     %%% Todo - note that the switching way has not been determined
     if phase >=1 && phase <=3
-        delta = delta / 3;
+        delta = delta / 3; 
         L = exp(max(mu_upper)) + sum(B) / delta;
         mu_0 = solution_phase;
     elseif phase <= 5
-        delta = delta / 2;
+        delta = delta / 3; % Todo: previous 2 - for real data
         L = exp(max(mu_upper)) + sum(B) / delta;
         mu_0 = solution_phase;
     else

@@ -1,9 +1,7 @@
+%%% EC 2025 Submission
 clc;
 clear;
-
-%%% ! Add path
-addpath('C:\Users\s1155203585\OneDrive - The Chinese University of Hong Kong\Desktop\EG_EXP\Linear\v0_funding_supp\Efficiency');
-
+addpath('C:\Users\s1155203585\Dropbox\EG_EXP\Linear\EC_Submission\Efficiency');
 % Define the matrix sizes to test
 matrix_sizes = [20, 50, 100, 200];
 
@@ -46,7 +44,8 @@ for i = 1:length(matrix_sizes)
         
         % Compute the gap
         mu = log(p_opt);
-        [gap, gap_array, matrix_backup] = linear_compute_gap(v, B, mu);
+        radius = 0; % Todo: set radius=0 for complete output
+        [gap, gap_array, matrix_backup] = linear_compute_gap(v, B, mu,radius);
         
         % Store the gap result
         results{j, i} = gap;

@@ -1,7 +1,5 @@
 function [gap, gap_array, activation_matrix] = linear_compute_gap(v, B, mu, radius_current)
-    %%% * Change the new index identification procedure
-    %%% * Function -> compute gap;activation matrix
-    %%% * Machine accuracy
+    %%% Todo: Consider the machine accuracy
     [n, m] = size(v);
     matrix = log(v) - mu;
     top_value = max(matrix, [], 2);

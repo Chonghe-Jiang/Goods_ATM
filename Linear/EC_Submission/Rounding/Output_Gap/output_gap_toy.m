@@ -1,7 +1,6 @@
 clc
 clear
-%%% ! Add path
-addpath('C:\Users\s1155203585\Dropbox\EG_EXP\Linear\EC_Submission\Efficiency');
+addpath('C:\Users\s1155203585\Dropbox\EG_EXP\Linear\EC_Submission\Rounding\Linear_System');
 n = 10; % number of rows
 m = 10; % number of columns
 
@@ -16,7 +15,8 @@ plot_flag = true;
 [p_opt, beta_opt, objective_value, solve_time] = linear_dual_solver(n, m, B, v);
 % Compute the gap
 mu = log(p_opt);
-[gap, gap_array, matrix_backup] = linear_compute_gap(v, B, mu);
+radius = 0; % Todo: set radius 
+[gap, gap_array, matrix_backup] = linear_compute_gap(v, B, mu,radius);
 fprintf('Gap: %f\n', gap);
 
 % % Parameters for the algorithms

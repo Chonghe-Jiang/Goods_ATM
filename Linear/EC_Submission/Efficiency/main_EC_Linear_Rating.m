@@ -1,5 +1,6 @@
 %%% EC 2025 Submission
 %%% ! Version: EC - Linear - Rating dataset - Iterative method - Unit budget (every element in B is 1)
+%%% ! Optimal Version for Submission
 clc
 clear
 v = readmatrix('Dataset\Ratings_kroer.csv') + 0.1;
@@ -10,7 +11,7 @@ B = ones(n,1);
 % Set common parameters
 max_iter = 10000;
 max_iter_adaptive = 4500;
-epsilon = 1e-1; % Stopping criteria with epsilon
+epsilon = 1e-1; % Stopping criteria with epsilon %%% Todo: Real-data precision
 plot_flag = true;
 
 %%% * Box constraint  
@@ -20,12 +21,12 @@ mu_lower = log(p_lower);
 mu_upper = log(p_upper);
 
 %%% * Parameter for convexity and smoothness and stepsize
-delta = 0.1;  
+delta = 0.8;  % Todo: Smoothing parameter
 sigma = min(exp(mu_lower));
 L = exp(max(mu_upper)) + (sum(B) / delta); 
 adaptive = false;
-step_size = 1e-4; % *subgradient stepsize
-eta = 0.1;  %*md stepsize
+step_size = 1e-4; % Todo: subgradient stepsize
+eta = 0.1;  %Todo: md stepsize
 
 %%% * - ini of p0 and mu0
 p0 = linear_init_gd(p_lower,p_upper,sum(B));
@@ -42,28 +43,28 @@ x0 = linear_init_md(p0,B);
 %%% ! In the following experiments - We are reading the results directly
 load('C:\Users\s1155203585\Dropbox\EG_EXP\Linear\EC_Submission\Efficiency\Solver_Rating.mat', 'p_opt_solver', 'beta_opt', 'fval_solver', 'solve_time');
 
-[solution_sub, obj_values_sub, dis_sub, time_sub, iter_sub] = linear_dual_subgradient(v, B, p0, max_iter, step_size, epsilon, plot_flag, p_opt_solver, fval_solver);
-disp(['Subgradient time: ', num2str(time_sub), ' seconds']);
-disp(['Subgradient iterations: ', num2str(iter_sub)]);
+% [solution_sub, obj_values_sub, dis_sub, time_sub, iter_sub] = linear_dual_subgradient(v, B, p0, max_iter, step_size, epsilon, plot_flag, p_opt_solver, fval_solver);
+% disp(['Subgradient time: ', num2str(time_sub), ' seconds']);
+% disp(['Subgradient iterations: ', num2str(iter_sub)]);
 
-[solution_md, time_md, iter_md, obj_values_md, distance_md] = linear_primal_md(v, B, x0, eta, epsilon, max_iter, plot_flag, p_opt_solver, fval_solver);
-disp(['MD iterations: ', num2str(iter_md)]);
-disp(['MD time: ', num2str(time_md), ' seconds']);
+% [solution_md, time_md, iter_md, obj_values_md, distance_md] = linear_primal_md(v, B, x0, eta, epsilon, max_iter, plot_flag, p_opt_solver, fval_solver);
+% disp(['MD iterations: ', num2str(iter_md)]);
+% disp(['MD time: ', num2str(time_md), ' seconds']);
 
-plot_flag = true;
-plot_flag_smooth = false;
-adaptive = false;
-delta_agd = 0.05; %%% ! important parameter here
-[solution_agd, time_agd, iter_agd, obj_values_agd, dis_agd, convergence_agd] = linear_dual_agd(v, B, mu0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta_agd, plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive);
-disp(['AGD iterations: ', num2str(iter_agd)]);
-disp(['AGD time: ', num2str(time_agd), ' seconds']);
+% plot_flag = true;
+% plot_flag_smooth = false;
+% adaptive = false;
+% delta_agd = 0.05; %%% ! important parameter here
+% [solution_agd, time_agd, iter_agd, obj_values_agd, dis_agd, convergence_agd] = linear_dual_agd(v, B, mu0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta_agd, plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive);
+% disp(['AGD iterations: ', num2str(iter_agd)]);
+% disp(['AGD time: ', num2str(time_agd), ' seconds']);
 
 
 adaptive_plot_flag = true;  
 plot_flag = false;
 plot_flag_smooth = false;
 adaptive = true;
-phase_num = 10;
+phase_num = 15;
 [solution_adaptive, total_time_adaptive, total_iter_adaptive, obj_values_adaptive, dis_adaptive] = linear_dual_adaptive(v, B, mu0, max_iter_adaptive, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, adaptive_plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive, phase_num);
 % disp(['Adaptive AGD final gap: ', num2str(obj_adaptive(end))]);
 disp(['Adaptive AGD iterations: ', num2str(total_iter_adaptive)]);

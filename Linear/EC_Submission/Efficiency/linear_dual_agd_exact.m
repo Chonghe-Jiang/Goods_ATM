@@ -1,7 +1,4 @@
 function [solution, time, iter, obj_values, dis_agd] = linear_dual_agd_exact(v, B, mu_0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive,epsilon_current)
-    %%% Todo: give a rigorous definition of the phase changing phenomena - several selections: gradient, relative gradient, gap
-    %%% Todo: choose the best parameter here
-    %%% Todo: initialization problem
     % Input:
     % v - parameter matrix v \in R^{n*m}
     % B - vector B \in R^{n*1}
@@ -31,11 +28,9 @@ function [solution, time, iter, obj_values, dis_agd] = linear_dual_agd_exact(v, 
     P = @(mu) max(mu_lower, min(mu, mu_upper));
 
     % Initialize the variables and parameters
-    %%% Todo - Initialization problem
     mu = mu_0;
     y = mu_0;
     % q = 0.1; 
-    %%% Todo - choose the best parameter here
     q = sigma/L; % L is only multiplied here
 
     % Initialize array to store objective function values
@@ -52,23 +47,15 @@ function [solution, time, iter, obj_values, dis_agd] = linear_dual_agd_exact(v, 
     for iter = 1:max_iter
         % Compute the objective function values
         obj = sum(exp(mu)) + sum(B .* max(log(v)-mu, [], 2)) - fval_solver;
-
         % Compute the smoothing function values
-        % ! Unstable: f_smooth = sum(exp(mu)) + delta * sum(B .* log(sum(exp((log(v) - repmat(mu,n,1)) / delta), 2))); 
-        % ! Solved - New stable one - minus the maximizer
-        % * This resolve the function problem
         max_log_v_mu = max(log(v) - repmat(mu, n, 1), [], 2);
         % Rescale the values by subtracting the minimum
         rescaled_log_v_mu = (log(v) - repmat(mu, n, 1) - max_log_v_mu) / delta;
 
         % Compute the log-sum-exp term using the rescaled values
         log_sum_exp_term = log(sum(exp(rescaled_log_v_mu), 2));
-
         % Compute the final expression
         f_smooth = sum(exp(mu)) + delta * sum(B .* ((max_log_v_mu/delta) + log_sum_exp_term));
-        % ! New stable end
-
-
         % Document some values
         obj_values(iter) = obj;
         f_smooth_values(iter) = f_smooth; 
@@ -82,25 +69,22 @@ function [solution, time, iter, obj_values, dis_agd] = linear_dual_agd_exact(v, 
         grad_f = exp(y) - temp_2;
         % ! Stable end
         
-        % Store the gradient norm
-        % grad_norms(iter) = norm(grad_f);
-
         % Update of mu and y
-        mu_new = P(y - (1 / (2*L)) * grad_f);
+        mu_new = P(y - (1 / (2*L)) * grad_f); %%% Todo: the old stepsize
         
         % Update y
         y_new = mu_new + ((1 - sqrt(q)) / (1 + sqrt(q))) * (mu_new - mu);
         
-        % Check convergence
-        %%% Todo-Before: how the stepsize is used in the stopping criteria in the three algorithms -whether we can use this information or not
-        %%% Todo-Before: give a rigorous definition of the phase changing phenomena - several selections: gradient, relative gradient, gap  
-        % if adaptive && iter>=100 && abs(f_smooth_values(iter) - f_smooth_values(iter-1)) < 1e-3 &&  abs(f_smooth_values(iter-1) - f_smooth_values(iter-2)) < 1e-3 && abs(f_smooth_values(iter-2) - f_smooth_values(iter-3)) < 1e-3 &&  abs(f_smooth_values(iter-3) - f_smooth_values(iter-4)) < 1e-3
+        % if iter >= 2 && obj < epsilon
+        %     convergence = true;
         %     break;
         % end
-        %%% Todo - Now: See whether this approach works
-        if abs(obj) < epsilon_current && iter >= 100
+        %%% Todo - new version - like the inexact version
+        %%% ! Should return the gap
+        if adaptive && iter>=100 && abs(f_smooth_values(iter) - f_smooth_values(iter-1)) < 1e-3 &&  abs(f_smooth_values(iter-1) - f_smooth_values(iter-2)) < 1e-3 && abs(f_smooth_values(iter-2) - f_smooth_values(iter-3)) < 1e-3 &&  abs(f_smooth_values(iter-3) - f_smooth_values(iter-4)) < 1e-3
             break;
         end
+        
         
         % Update variables
         mu = mu_new;

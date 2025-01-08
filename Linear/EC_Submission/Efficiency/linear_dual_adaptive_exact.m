@@ -1,5 +1,6 @@
-function [solution_adaptive, total_time_adaptive, total_iter_adaptive, obj_adaptive, dis_adaptive, results_matrix] = linear_dual_adaptive_exact(v, B, mu_0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, adaptive_plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive, phase_num, epsilon_current)
-
+function [solution_adaptive, total_time_adaptive, total_iter_adaptive, obj_adaptive, dis_adaptive, results_matrix] = linear_dual_adaptive_exact(v, B, mu_0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, adaptive_plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive, phase_num)
+    %%% ! Reconsider the epsilon problem - epsilon_iter should be the power epsilon_current
+    %%% ! Reconsider the epsilon problem - F()-F()\leq
     % Initialize variables
     time_adaptive = [];
     iter_adaptive = [];
@@ -12,10 +13,9 @@ function [solution_adaptive, total_time_adaptive, total_iter_adaptive, obj_adapt
     % Loop over phases
     for phase = 1:phase_num
         % Call the linear_dual_agd function
-        %%% Todo: Inner accuracy setting
-        % epsilon_current = 1e-4;
-        [solution_phase, time_phase, iter_phase, obj_phase, dis_phase] = linear_dual_agd_exact(v, B, mu_0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive, epsilon_current);
-        
+        %%% ! Step 1: Run the inner step
+        [solution_phase, time_phase, iter_phase, obj_phase, dis_phase] = linear_dual_agd_exact(v, B, mu_0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive);
+        %%% ! Step 2: Extract the gap_current as the paper mentioned
         % Calculate and print the gap between solution_phase and log(p_opt_solver)
         gap_current = norm(solution_phase - log(p_opt_solver), 2);
         fprintf('Phase %d: Gap between solution and log(p_opt_solver) = %f\n', phase, gap_current);
@@ -29,12 +29,13 @@ function [solution_adaptive, total_time_adaptive, total_iter_adaptive, obj_adapt
         % Accumulate total time
         total_time_adaptive = total_time_adaptive + time_phase;
         total_iter_adaptive = total_iter_adaptive + iter_phase;
-        
+        %%% ! Print the information
         % Print phase information
         fprintf('Phase %d: Iterations = %d, Initial Objective = %f, Final Objective = %f\n', phase, iter_phase, obj_phase(1), obj_phase(end));
-        
+        %%% ! Step3: Set the radius according to the paper
         % Call the exact oracle function
-        radius_curent = sqrt(2*epsilon_current/sigma);
+        radius_curent = sqrt(2*gap_current/sigma);
+        %%% ! Step4: Run the oracle
         [oracle_result, optimal_ce, optimal_value, sum_exp_mu] = linear_exact_oracle(v, B, solution_phase, radius_curent);
         
         % Store the results in the matrix
