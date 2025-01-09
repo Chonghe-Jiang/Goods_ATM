@@ -1,7 +1,7 @@
 %%% EC 2025 Submission
 clc;
 clear;
-addpath('C:\Users\s1155203585\Dropbox\EG_EXP\Linear\EC_Submission\Efficiency');
+addpath('C:\Users\s1155203585\Dropbox\EG_EXP\Linear\EC_Submission\Rounding\Linear_System');
 % Define the matrix sizes to test
 matrix_sizes = [20, 50, 100, 200];
 
