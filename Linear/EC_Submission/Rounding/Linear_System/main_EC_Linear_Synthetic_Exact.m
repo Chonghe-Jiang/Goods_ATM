@@ -1,9 +1,8 @@
 %%% EC 2025 Submission version
-%%% ! Mechanism of the oracle
-%%% ! Mechanism of the inner error
 clc
 clear
-addpath('C:\Users\s1155203585\Dropbox\EG_EXP\Linear\EC_Submission\Efficiency\Dataset');
+addpath('C:\Users\s1155203585\Dropbox\EG_EXP\Linear\EC_Submission\Efficiency');
+%%% ! Step 1: Basic setting of the problem
 %%% Todo: Consider the machine accuracy 
 n = 5;  % Number of rows
 m = 5;   % Number of columns
@@ -27,7 +26,6 @@ L = exp(max(mu_upper)) + (sum(B) / delta);
 p0 = linear_init_gd(p_lower,p_upper,sum(B));
 mu0 = log(p0); %
 [p_opt_solver, beta_opt, fval_solver, solve_time] = linear_dual_solver(n, m, B, v);
-%%% Todo: Notice that the solver result is also not accurate 
 
 %%% ! There is an extra step to test the quality of solver result
 % gap_solution = linear_compute_gap_cheating(v, B, log(p_opt_solver));
@@ -42,16 +40,15 @@ mu0 = log(p0); %
 % disp(test_result);
 p_opt_solver = p_opt_solver'; % Transfer to a row vector
 
+%%% ! Step 2: Start the SGR-Exact
 adaptive_plot_flag = true;  % Set to true if you want to plot the results
 plot_flag = false;
 plot_flag_smooth = false;
 adaptive = true;
 phase_num = 20;
-% epsilon_current = 0.8; %%% ! Old method in setting inner error - theoretical approach
 [solution_adaptive, total_time_adaptive, total_iter_adaptive, obj_values_adaptive, dis_adaptive, results_matrix] = linear_dual_adaptive_exact(v, B, mu0, max_iter_adaptive, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, adaptive_plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive, phase_num);
 disp(['Adaptive AGD iterations: ', num2str(total_iter_adaptive)]);
 disp(['Adaptive AGD time: ', num2str(total_time_adaptive), ' seconds']);
 
-%%% * Output the final result
-gap_adaptive = norm(solution_adaptive - log(p_opt_solver), 'fro');
-disp(['Gap between Adaptive Solution and Optimal Solution: ', num2str(gap_adaptive)]);
+% gap_adaptive = norm(solution_adaptive - log(p_opt_solver), 'fro');
+% disp(['Gap between Adaptive Solution and Optimal Solution: ', num2str(gap_adaptive)]);

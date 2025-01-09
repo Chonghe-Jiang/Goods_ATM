@@ -8,10 +8,10 @@ function [oracle_result, optimal_ce, optimal_value, sum_exp_mu] = linear_exact_o
     %   oracle_result: True if the solution is feasible, False otherwise
     %   optimal_ce: Optimal certificate (solution) if feasible, NaN otherwise
 
-    % Step 1: Compute the gap and activation matrix
+    %%% ! Step 1: Compute the gap and activation matrix
     [~ ,~ , activation_matrix] = linear_compute_gap(v, B, mu, radius_current);
 
-    % Step 2: Generate the solution using linear_class_generation
+    %%% ! Step 2: Generate the solution using linear_class_generation: two stages inside
     solution = linear_class_generation(activation_matrix, v, B);
     % Step 3: Check feasibility using linear_max_flow
     [is_feasible, optimal_value, sum_exp_mu] = linear_max_flow(solution, B, v, activation_matrix);

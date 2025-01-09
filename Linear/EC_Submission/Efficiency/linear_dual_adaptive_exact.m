@@ -1,6 +1,4 @@
 function [solution_adaptive, total_time_adaptive, total_iter_adaptive, obj_adaptive, dis_adaptive, results_matrix] = linear_dual_adaptive_exact(v, B, mu_0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, adaptive_plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive, phase_num)
-    %%% ! Reconsider the epsilon problem - epsilon_iter should be the power epsilon_current
-    %%% ! Reconsider the epsilon problem - F()-F()\leq
     % Initialize variables
     time_adaptive = [];
     iter_adaptive = [];
@@ -15,10 +13,10 @@ function [solution_adaptive, total_time_adaptive, total_iter_adaptive, obj_adapt
         % Call the linear_dual_agd function
         %%% ! Step 1: Run the inner step
         [solution_phase, time_phase, iter_phase, obj_phase, dis_phase] = linear_dual_agd_exact(v, B, mu_0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive);
-        %%% ! Step 2: Extract the gap_current as the paper mentioned
+        %%% ! Step 2: Extract the gap_current as the paper mentioned - functino value not variable value
         % Calculate and print the gap between solution_phase and log(p_opt_solver)
-        gap_current = norm(solution_phase - log(p_opt_solver), 2);
-        fprintf('Phase %d: Gap between solution and log(p_opt_solver) = %f\n', phase, gap_current);
+        % gap_current = norm(solution_phase - log(p_opt_solver), 2);
+        % fprintf('Phase %d: Gap between solution and log(p_opt_solver) = %f\n', phase, gap_current);
         
         % Update variables
         time_adaptive = [time_adaptive; time_phase];
@@ -32,6 +30,7 @@ function [solution_adaptive, total_time_adaptive, total_iter_adaptive, obj_adapt
         %%% ! Print the information
         % Print phase information
         fprintf('Phase %d: Iterations = %d, Initial Objective = %f, Final Objective = %f\n', phase, iter_phase, obj_phase(1), obj_phase(end));
+        gap_current = obj_phase(end);
         %%% ! Step3: Set the radius according to the paper
         % Call the exact oracle function
         radius_curent = sqrt(2*gap_current/sigma);
