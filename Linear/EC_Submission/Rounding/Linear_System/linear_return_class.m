@@ -1,4 +1,4 @@
-function [row_classes, column_classes, col_class_matrices] = linear_return_activation(A, v)
+function [row_classes, column_classes, col_class_matrices] = linear_return_class(A, v)
     % Input:
     % A - binary input matrix (rows represent nodes, columns represent features)
     % v - a matrix of the same size as A, used to compute log values
@@ -9,6 +9,9 @@ function [row_classes, column_classes, col_class_matrices] = linear_return_activ
 
     % Step 1: Find row classes (connected components) in A
     row_classes = linear_equi(A);
+    for i = 1:numel(row_classes)
+        row_classes{i} = sort(row_classes{i});
+    end
 
     % Initialize outputs
     col_class_matrices = cell(1, length(row_classes));

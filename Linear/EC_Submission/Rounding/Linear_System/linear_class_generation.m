@@ -6,7 +6,7 @@ function solution = linear_class_generation(A, v, B)
     % solution: 1*m vector
     %%% ! Step 1: Do classification of different classes
     %%% Todo: the input A -> output classes; we use brand new function type to represent it 
-    [row_classes, column_classes, col_class_matrices] = linear_return_activation(A, v);
+    [row_classes, column_classes, col_class_matrices] = linear_return_class(A, v);
     %%% ! Step 2: Do computation for every class - use the above information
     m = size(A, 2); % Number of columns in A
     solution = zeros(1, m); % Initialize solution vector

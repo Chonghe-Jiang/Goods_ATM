@@ -43,13 +43,13 @@ x0 = linear_init_md(p0,B);
 %%% ! In the following experiments - We are reading the results directly
 load('C:\Users\s1155203585\Dropbox\EG_EXP\Linear\EC_Submission\Efficiency\Solver_Rating.mat', 'p_opt_solver', 'beta_opt', 'fval_solver', 'solve_time');
 
-% [solution_sub, obj_values_sub, dis_sub, time_sub, iter_sub] = linear_dual_subgradient(v, B, p0, max_iter, step_size, epsilon, plot_flag, p_opt_solver, fval_solver);
-% disp(['Subgradient time: ', num2str(time_sub), ' seconds']);
-% disp(['Subgradient iterations: ', num2str(iter_sub)]);
+[solution_sub, obj_values_sub, dis_sub, time_sub, iter_sub] = linear_dual_subgradient(v, B, p0, max_iter, step_size, epsilon, plot_flag, p_opt_solver, fval_solver);
+disp(['Subgradient time: ', num2str(time_sub), ' seconds']);
+disp(['Subgradient iterations: ', num2str(iter_sub)]);
 
-% [solution_md, time_md, iter_md, obj_values_md, distance_md] = linear_primal_md(v, B, x0, eta, epsilon, max_iter, plot_flag, p_opt_solver, fval_solver);
-% disp(['MD iterations: ', num2str(iter_md)]);
-% disp(['MD time: ', num2str(time_md), ' seconds']);
+[solution_md, time_md, iter_md, obj_values_md, distance_md] = linear_primal_md(v, B, x0, eta, epsilon, max_iter, plot_flag, p_opt_solver, fval_solver);
+disp(['MD iterations: ', num2str(iter_md)]);
+disp(['MD time: ', num2str(time_md), ' seconds']);
 
 % plot_flag = true;
 % plot_flag_smooth = false;
@@ -80,6 +80,7 @@ semilogy(x_md, abs(obj_values_md), '-d', 'DisplayName', 'Mirror Descent', 'LineW
 hold on;
 semilogy(x_subgrad, abs(obj_values_sub), '-d', 'DisplayName', 'Tatonnement', 'LineWidth', 0.2); % Plot obj_subgrad
 % plot(x_agd, obj_agd, '-s', 'DisplayName', 'obj\_agd', 'LineWidth', 1.0); % Plot obj_agd
+hold on;
 semilogy(x_adaptive, abs(obj_values_adaptive), '-d', 'DisplayName', 'SGA', 'LineWidth', 0.2);
 hold off;
 

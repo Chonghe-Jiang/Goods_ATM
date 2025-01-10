@@ -70,7 +70,7 @@ function [solution, time, iter, obj_values, dis_agd] = linear_dual_agd_exact(v, 
         % ! Stable end
         
         % Update of mu and y
-        mu_new = P(y - (1 / (2*L)) * grad_f); %%% Todo: the old stepsize
+        mu_new = P(y - (1 / L) * grad_f); %%% Todo: the new stepsize for faster convergence
         
         % Update y
         y_new = mu_new + ((1 - sqrt(q)) / (1 + sqrt(q))) * (mu_new - mu);
@@ -79,7 +79,7 @@ function [solution, time, iter, obj_values, dis_agd] = linear_dual_agd_exact(v, 
         %     convergence = true;
         %     break;
         % end
-        %%% Todo - new version - like the inexact version
+        %%% Todo - new version - like the inexact version - epsilon will be calculated later
         if adaptive && iter>=100 && abs(f_smooth_values(iter) - f_smooth_values(iter-1)) < 1e-3 &&  abs(f_smooth_values(iter-1) - f_smooth_values(iter-2)) < 1e-3 && abs(f_smooth_values(iter-2) - f_smooth_values(iter-3)) < 1e-3 &&  abs(f_smooth_values(iter-3) - f_smooth_values(iter-4)) < 1e-3
             break;
         end

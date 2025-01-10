@@ -33,7 +33,7 @@ function [solution_adaptive, total_time_adaptive, total_iter_adaptive, obj_adapt
         gap_current = obj_phase(end);
         %%% ! Step3: Set the radius according to the paper
         % Call the exact oracle function
-        radius_curent = sqrt(2*gap_current/sigma);
+        radius_curent = sqrt(2*gap_current/sigma); %%% Todo: be careful with the gap calculation method now
         %%% ! Step4: Run the oracle
         [oracle_result, optimal_ce, optimal_value, sum_exp_mu] = linear_exact_oracle(v, B, solution_phase, radius_curent);
         
