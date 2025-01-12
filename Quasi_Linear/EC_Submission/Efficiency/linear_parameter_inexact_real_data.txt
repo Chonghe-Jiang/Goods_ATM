@@ -1,4 +1,0 @@
-real data 
-SAG epoch: 15
-SAG pattern: 3;3;1.5
-SAG stepsize: 2/L (note that it is not 1/2L)

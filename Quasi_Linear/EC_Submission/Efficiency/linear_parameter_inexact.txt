@@ -1,5 +1,0 @@
-tolerance datasype size sub-stepsize md-stepsize agd-related multiple-related
-0.1 rand 50*50 1e-3 0.01 delta=0.01 NAN
-0.1 rand 100*100 1e-3 0.01 delta=0.01 NAN
-0.1 rand 200*200 1e-3 0.2 delta=0.005 NAN
-0.1 rand 500*500 1e-3(decrease) 0.2 delta=0.005(decrease) NAN
