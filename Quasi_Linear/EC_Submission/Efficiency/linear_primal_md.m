@@ -1,10 +1,11 @@
-function [solution, time, iter, obj_values, distance_md ] = linear_primal_md(v, B, x_0, eta, epsilon, max_iter, plot_flag, p_opt_solver, fval_solver)
+function [solution, time, iter, obj_values, distance_md] = quasi_primal_md(v, B, x_0, eta, epsilon, max_iter, plot_flag, p_opt_solver, fval_solver)
     % mirror_descent: Solves the following optimization problem using Mirror Descent:
-    %
-    % max sum_{i, j} b_{i j} log(v_{i j}) - sum_j (sum_i b_{i j}) log(sum_i b_{i j})
-    % s.t. sum_j b_{i j} = B_i, i in [n]
+    %%% ! We are solving quasi-linear problem
+    % max sum_{i, j} b_{i j} (1 + log(v_{i j})) - sum_j (sum_i b_{i j}) log(sum_i b_{i j})
+    % s.t. sum_j b_{i j} + delta_i = B_i, i in [n]
     %      b_{i j} >= 0
-    
+    %      delta_i >= 0
+
     % Inputs:
     % v: n x m matrix, given values
     % B: n x 1 vector, given constraints
@@ -14,60 +15,65 @@ function [solution, time, iter, obj_values, distance_md ] = linear_primal_md(v, 
     % max_iter: maximum number of iterations
     % p_opt_solver: 1 x m vector, optimal p values for comparison
     % plot_flag
-    
+
     % Outputs:
-    % x_final: n x m matrix, final solution of the allocation problem
+    % solution: 1 x m vector, final solution of the allocation problem
+    % time: total computation time
+    % iter: number of iterations
+    % obj_values: array of objective function values
+    % distance_md: array of distances to the optimal solution
 
     [n, m] = size(v);
-    
-    % Project initial point x_0 to satisfy constraints
-    % x = projection_simplex(x_0, B, n, m);
-    %%% Todo - same initilization problem - solved
-    x = x_0;
+    %%% Todo: fix the initialization issue
+    % Initialize variables
+    X = [x_0, B - sum(x_0, 2)]; % Augmented matrix: [x, delta]
     iter = 1;
     obj_values = []; % Array to store objective function values
-    distance_md = [];
+    distance_md = []; % Array to store distances to the optimal solution
     tic;
+
     while iter < max_iter
         % Compute gradient
-        % grad_{i, j} = log(v_{i, j}) - log(sum_i x_{i, j}) - 1
-        % grad = log(v) - log(sum(x, 1)) - 1; - wrong version
-        % grad = 1 - log(v) + log(sum(x, 1));
-        grad = - log(v) + log(sum(x, 1));
-        % Todo- please check the gradient computation
-        %%% Warning: This is a max problem so we should convert it into a min problem
-        %%% Warning: Consider the gradient here - gradient descent of the negative objective function
+        % grad_{i, j} = 1 + log(v_{i, j}) - log(sum_i x_{i, j}) - 1
+        % Simplify: grad_{i, j} = log(v_{i, j}) - log(sum_i x_{i, j})
+        grad_x = -log(v) + log(sum(X(:, 1:m), 1));
+
+        % Gradient for delta_i is 0 because delta_i does not appear in the objective
+        grad_delta = zeros(n, 1);
+
+        % Combine gradients into a single matrix
+        grad = [grad_x, grad_delta];
+
         % Compute current p_j = sum_i x_{i j}
-        p_current = sum(x, 1);
+        p_current = sum(X(:, 1:m), 1);
         distance_current = norm(p_current - p_opt_solver, 2);
         distance_md = [distance_md, distance_current];
-        obj = sum(p_current) - sum(B .* log(min(p_current ./ v, [], 2))) - fval_solver; 
-        obj_values = [obj_values, obj];
-        % Update step using exponential gradient descent
-        % x_new_{i, j} = x_{i, j} * exp(-eta * grad_{i, j})
-        % Use the normalization from the Bolte paper (already theorem)
-        x_temp = x .* exp(-eta * grad);
-        sum_temp = repmat(sum(x_temp,2)./B,1,m);
-        x_new = x_temp./sum_temp;
 
-        % Stopping criteria by using the distance of the point p: gap(p)/stepsize
-        % Alternative1 - with the solver
-        % Alternative2 - using the function value
-        %%% Todo - unifying the stopping creteria
+        % Compute objective function value
+        %%% ! Here we need to change the expression of the original function
+        obj = sum(p_current) - sum(B .* log(min([ones(n, 1), p_current ./ v], [], 2))) - fval_solver; 
+        obj_values = [obj_values, obj];
+
+        % Update step using exponential gradient descent
+        X_temp = X .* exp(-eta * grad);
+        sum_temp = repmat(sum(X_temp,2)./B,1,m);
+        % Normalize each row of X_temp to satisfy sum_j X_{i j} = B_i
+        X_new = X_temp ./ sum_temp;
+
+        % Stopping criteria
         if iter > 2 && obj < epsilon
             break;
         end
 
-        % Update x
-        x = x_new;
+        % Update X
+        X = X_new;
         iter = iter + 1;
     end
+
     time = toc;
-    x_mirror = x;
-    solution = sum(x_mirror, 1);
+    solution = sum(X(:, 1:m), 1);
 
-
-    % Plot the figure if plot_figure is 1
+    % Plot the figure if plot_flag is 1
     if plot_flag
         figure;
         subplot(2, 1, 1);
@@ -83,4 +89,3 @@ function [solution, time, iter, obj_values, distance_md ] = linear_primal_md(v, 
         title('MD - Iteration Convergence');
     end
 end
-

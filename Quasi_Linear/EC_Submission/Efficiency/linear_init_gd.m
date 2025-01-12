@@ -9,8 +9,8 @@ function p = linear_init_gd(l, u, c)
     m = length(l);
     
     % Construct the linear programming constraint matrix and vector
-    Aeq = ones(1, m); % Corresponds to sum_i x_i = c
-    beq = c;
+    A = ones(1, m); % Corresponds to sum_i x_i <= c
+    b = c;
     
     % Linear programming objective function (can be set arbitrarily)
     f = zeros(m, 1);
@@ -18,10 +18,10 @@ function p = linear_init_gd(l, u, c)
     % Linear programming variable lower and upper bounds
     lb = l';
     ub = u';
-    
+    %%% ! Change it to quasi linear case with inequality
     % Use linprog to solve the linear programming problem
-    p = linprog(f, [], [], Aeq, beq, lb, ub);
+    p = linprog(f, A, b, [], [], lb, ub);
     
-    % Reshape the result back to a 1 x n vector
+    % Reshape the result back to a 1 x m vector
     p = p';
 end
