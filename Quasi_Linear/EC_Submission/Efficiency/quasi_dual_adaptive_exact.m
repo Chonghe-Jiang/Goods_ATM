@@ -1,4 +1,4 @@
-function [solution_adaptive, total_time_adaptive, total_iter_adaptive, obj_adaptive, dis_adaptive, results_matrix] = linear_dual_adaptive_exact(v, B, mu_0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, adaptive_plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive, phase_num)
+function [solution_adaptive, total_time_adaptive, total_iter_adaptive, obj_adaptive, dis_adaptive, results_matrix] = quasi_dual_adaptive_exact(v, B, mu_0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, adaptive_plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive, phase_num)
     % Initialize variables
     time_adaptive = [];
     iter_adaptive = [];

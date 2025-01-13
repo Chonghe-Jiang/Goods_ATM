@@ -10,7 +10,7 @@ total_iter_adaptive = 0;
 % Loop over phases
 for phase = 1:phase_num
     % Call the linear_dual_agd function
-    [solution_phase, time_phase, iter_phase, obj_phase, dis_phase, convergence] = linear_dual_agd(v, B, mu_0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive);
+    [solution_phase, time_phase, iter_phase, obj_phase, dis_phase, convergence] = quasi_dual_agd(v, B, mu_0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive);
     
     % Update variables
     time_adaptive = [time_adaptive; time_phase];

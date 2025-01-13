@@ -27,6 +27,7 @@ function [solution, time, iter, obj_values, distance_md] = quasi_primal_md(v, B,
     %%% ! Todo: fix the initialization issue -> still need to check
     % Initialize variables
     %%% ! Todo: this is also a change
+    %%% ! X is the matrix with big size
     X = [x_0, B - sum(x_0, 2)]; % Augmented matrix: [x, delta]
     iter = 1;
     obj_values = []; % Array to store objective function values
@@ -52,13 +53,12 @@ function [solution, time, iter, obj_values, distance_md] = quasi_primal_md(v, B,
 
         % Compute objective function value
         %%% ! Here we need to change the expression of the original function
-        %%% Todo: unify one expression -> I guess both work
         obj = sum(p_current) - sum(B .* log(min([ones(n, 1), p_current ./ v], [], 2))) - fval_solver; 
         obj_values = [obj_values, obj];
        
         % Update step using exponential gradient descent
         X_temp = X .* exp(-eta * grad);
-        sum_temp = repmat(sum(X_temp,2)./B,1,m);
+        sum_temp = repmat(sum(X_temp,2)./B,1,m+1); % ! Here we need to pay attention to the size
         % Normalize each row of X_temp to satisfy sum_j X_{i j} = B_i
         X_new = X_temp ./ sum_temp;
 

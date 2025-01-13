@@ -47,7 +47,7 @@ function [solution, time, iter, obj_values, distance_md ] = linear_primal_md(v, 
         % x_new_{i, j} = x_{i, j} * exp(-eta * grad_{i, j})
         % Use the normalization from the Bolte paper (already theorem)
         x_temp = x .* exp(-eta * grad);
-        sum_temp = repmat(sum(x_temp,2)./B,1,m);
+        sum_temp = repmat(sum(x_temp,2)./B,1,m); 
         x_new = x_temp./sum_temp;
 
         % Stopping criteria by using the distance of the point p: gap(p)/stepsize

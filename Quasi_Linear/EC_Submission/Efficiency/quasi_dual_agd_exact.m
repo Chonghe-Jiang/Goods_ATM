@@ -1,4 +1,4 @@
-function [solution, time, iter, obj_values, dis_agd] = linear_dual_agd_exact(v, B, mu_0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive,epsilon_current)
+function [solution, time, iter, obj_values, dis_agd] = quasi_dual_agd_exact(v, B, mu_0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive,epsilon_current)
     % Input:
     % v - parameter matrix v \in R^{n*m}
     % B - vector B \in R^{n*1}

@@ -7,9 +7,9 @@ clear
 
 %%% Todo: Start from the basic size
 % Define problem parameters
-n = 50;  % Number of rows 
-m = 50;   % Number of columns
-B = rand(n, 1);  % Random B vector
+n = 5;  % Number of rows 
+m = 5;   % Number of columns
+B = ones(n, 1);  % Random B vector
 v = rand(n,m);
 v = v ./ sum(v, 2); 
 
@@ -21,7 +21,7 @@ plot_flag = true;
 
 %%% ! Box constraint - Quasi Linear Version
 p_lower = max(v .* B ./ (sum(abs(v),2)+B)); %%%!  quasi linear version
-p_upper = max(v); %%%!  quasi linear version
+p_upper = max(max(v))*ones(1,m); %%%!  quasi linear version
 mu_lower = log(p_lower);
 mu_upper = log(p_upper);
 
@@ -30,13 +30,13 @@ delta = 0.3;
 sigma = min(exp(mu_lower));
 L = exp(max(mu_upper)) + (sum(B) / delta); 
 adaptive = false;
-step_size = 1e-3; %%% Todo: Subgradient stepsize
+step_size = 1e-5; %%% Todo: Subgradient stepsize
 eta = 0.2;  %%% Todo: MD stepsize
 
 %%% * - ini of p0 and mu0
-p0 = linear_init_gd(p_lower,p_upper,sum(B));
+p0 = quasi_init_gd(p_lower,p_upper,sum(B));
 mu0 = log(p0); %
-x0 = linear_init_md(p0,B);
+x0 = quasi_init_md(p0,B);
 
 %%% * - solve the problem by solver
 %%% ! No need for change
@@ -63,7 +63,7 @@ disp(['MD time: ', num2str(time_md), ' seconds']);
 plot_flag = true;
 plot_flag_smooth = false;
 adaptive = false;
-delta_agd = 0.003; %%% Todo: AGD- smoothing parameter
+delta_agd = 0.1; %%% Todo: AGD- smoothing parameter
 [solution_agd, time_agd, iter_agd, obj_values_agd, dis_agd, convergence_agd] = quasi_dual_agd(v, B, mu0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta_agd, plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive);
 disp(['AGD iterations: ', num2str(iter_agd)]);
 disp(['AGD time: ', num2str(time_agd), ' seconds']);

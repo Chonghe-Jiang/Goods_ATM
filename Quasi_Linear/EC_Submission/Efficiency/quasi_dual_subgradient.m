@@ -35,12 +35,13 @@ function [solution,obj_values, dis_sub, time, iter] = quasi_dual_subgradient(v, 
     for iter = 1:max_iter
         % Compute the objective function and subgradient
         %%% ! We also need to change the function value calculation
-        obj_values = sum(p) - sum(B .* log(min(1, min(p ./ v, [], 2))));
+        obj = sum(p) - sum(B .* log(min([ones(n,1),p ./ v], [], 2))) - fval_solver;
         subgrad = ones(1, m);
         for i = 1:n
-            [max_val, max_idx] = max(p ./ v(i, :));
-            if max_val >= 0 %%% ! The change in calculating the subgradient
-                selected_idx = max_idx(randi(length(max_idx)));
+            %%% ! Problem solved - note that the index here is important
+            [min_val, min_idx] = min( p ./ v(i, :)); 
+            if min_val < 1 %%% ! The change in calculating the subgradient;logic problem
+                selected_idx = min_idx(randi(length(min_idx)));
                 subgrad(selected_idx) = subgrad(selected_idx) - B(i) / p(selected_idx);
             end
         end

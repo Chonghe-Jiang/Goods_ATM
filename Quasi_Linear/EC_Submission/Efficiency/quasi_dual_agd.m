@@ -48,6 +48,7 @@ function [solution, time, iter, obj_values, dis_agd, convergence] = quasi_dual_a
     for iter = 1:max_iter
         % Compute the objective function values
         %%% ! New gradient calculation - quasi-linear version
+        %%% ! Change in function value
         max_log_v_mu = max([zeros(n, 1), log(v) - repmat(mu, n, 1)], [], 2); % Include 0 in the max
         obj = sum(exp(mu)) + sum(B .* max_log_v_mu) - fval_solver;
 
@@ -60,26 +61,26 @@ function [solution, time, iter, obj_values, dis_agd, convergence] = quasi_dual_a
         log_sum_exp_term = log(sum(exp_temp1, 2)); % Log-sum-exp
 
         % Compute the final smoothing function
-        %%% Todo: not important for this smoothing function
+        %%% ! Changes in calculatting the smooth function value
         f_smooth = sum(exp(mu)) + delta * sum(B .* ((max_temp1 / delta) + log_sum_exp_term));
 
         % Document some values
         obj_values(iter) = obj;
         f_smooth_values(iter) = f_smooth;
+        %%% Todo: if use this distance, we should unify log or not
         dis_agd(iter) = norm(exp(mu) - p_opt_solver);
 
         % Compute the gradient
         % Include 0 in the softmax-like calculation
         % Stable gradient calculation
         % Include 0 in the stabilization
-        temp1 = [zeros(n, 1), log(v) - repmat(mu, n, 1)]; % Include 0 in the max
+        %%% ! Calculating the gradient of y
+        temp1 = [zeros(n, 1), log(v) - repmat(y, n, 1)]; % Include 0 in the max
         max_temp1 = max(temp1, [], 2); % Normalize for every row
         exp_temp1 = exp((temp1 - max_temp1) / delta); % Stabilized exponentials
         cal_temp1 = exp_temp1 ./ (1 + sum(exp_temp1(:, 2:end), 2)); % Softmax-like term, excluding the 0 term
         temp_2 = sum(B .* cal_temp1(:, 2:end)); % Exclude the 0 term for gradient
-        grad_f = exp(mu) - temp_2'; % Gradient
-        %%% ! End new calculator for quasi-linear
-        
+        grad_f = exp(y) - temp_2; % Gradient
 
         % Update of mu and y
         %%% Todo: Be careful here, whether we use long step or not

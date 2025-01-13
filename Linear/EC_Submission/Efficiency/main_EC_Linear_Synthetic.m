@@ -6,8 +6,8 @@ clear
 % Set random seed for reproducibility
 
 % Define problem parameters
-n = 500;  % Number of rows %%% Todo: Change the size
-m = 500;   % Number of columns
+n = 5;  % Number of rows %%% Todo: Change the size
+m = 5;   % Number of columns
 B = rand(n, 1);  % Random B vector
 v = rand(n,m);
 v = v ./ sum(v, 2); 
