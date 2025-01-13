@@ -6,10 +6,10 @@ addpath('C:\Users\s1155203585\Dropbox\EG_EXP\Linear\EC_Submission\Efficiency');
 %%% Todo: Consider the machine accuracy 
 n = 50;  % Number of rows
 m = 50;   % Number of columns
-B = ones(n, 1);  % Random B vector
-% v = randi([1, 10], n, m); work
+B = rand(n, 1);  % Random B vector
+v = randi([1, 10], n, m); 
 % v = exprnd(10, n, m); does not work
-v = lognrnd(0, 10, n, m); % Draw valuations from log-normal distribution
+% v = lognrnd(0, 10, n, m); % Draw valuations from log-normal distribution
 % v = rand(n,m);
 v = v ./ sum(v, 2); 
 

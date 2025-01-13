@@ -1,4 +1,4 @@
-function [row_classes, column_classes, col_class_matrices] = linear_return_class(A, v)
+function [row_classes, column_classes, col_class_matrices] = quasi_return_class(A, v)
     % Input:
     % A - binary input matrix (rows represent nodes, columns represent features)
     % v - a matrix of the same size as A, used to compute log values

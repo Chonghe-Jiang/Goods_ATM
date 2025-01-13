@@ -12,7 +12,7 @@ function [solution_adaptive, total_time_adaptive, total_iter_adaptive, obj_adapt
     for phase = 1:phase_num
         % Call the linear_dual_agd function
         %%% ! Step 1: Run the inner step
-        [solution_phase, time_phase, iter_phase, obj_phase, dis_phase] = linear_dual_agd_exact(v, B, mu_0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive);
+        [solution_phase, time_phase, iter_phase, obj_phase, dis_phase] = quasi_dual_agd_exact(v, B, mu_0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive);
         %%% ! Step 2: Extract the gap_current as the paper mentioned - functino value not variable value
         % Calculate and print the gap between solution_phase and log(p_opt_solver)
         % gap_current = norm(solution_phase - log(p_opt_solver), 2);
@@ -35,7 +35,7 @@ function [solution_adaptive, total_time_adaptive, total_iter_adaptive, obj_adapt
         % Call the exact oracle function
         radius_curent = sqrt(2*gap_current/sigma); %%% Todo: be careful with the gap calculation method now
         %%% ! Step4: Run the oracle
-        [oracle_result, optimal_ce, optimal_value, sum_exp_mu] = linear_exact_oracle(v, B, solution_phase, radius_curent);
+        [oracle_result, optimal_ce, optimal_value, sum_exp_mu] = quasi_exact_oracle(v, B, solution_phase, radius_curent);
         
         % Store the results in the matrix
         results_matrix = [results_matrix; optimal_value, sum_exp_mu];

@@ -1,4 +1,4 @@
-function classes = linear_equi(matrix)
+function classes = quasi_equi(matrix)
     % Input: matrix - a binary matrix where matrix(i,j) = 1 indicates a connection between row i and column j
     % Output: classes - a cell array where each cell contains the indices of rows that belong to the same class
 
