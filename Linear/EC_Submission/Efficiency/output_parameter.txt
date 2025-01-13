@@ -1,0 +1,33 @@
+market type, error threshold, instance size, data generation type
+Low accuracy:
+linear, 0.1, 50, rand                      delta=0.01   
+linear, 0.1, 200, rand                     delta=0.005    
+linear, 0.1, 500, rand                     delta=0.005
+
+linear, 0.1, 50, randi                     
+linear, 0.1, 50, logrand
+linear, 0.1, 50, exp
+
+linear, 0.1, 200, randi
+linear, 0.1, 200, logrand
+linear, 0.1, 200, exp
+
+linear, 0.1, 500, randi               
+linear, 0.1, 500, logrand
+linear, 0.1, 500, exp
+
+High accuracy:
+linear, 0.01, 50, rand
+linear, 0.01, 50, randi
+linear, 0.01, 50, logrand
+linear, 0.01, 50, exp
+
+linear, 0.01, 200, rand
+linear, 0.01, 200, randi
+linear, 0.01, 200, logrand
+linear, 0.01, 200, exp
+
+linear, 0.01, 500, rand
+linear, 0.01, 500, randi
+linear, 0.01, 500, logrand
+linear, 0.01, 500, exp

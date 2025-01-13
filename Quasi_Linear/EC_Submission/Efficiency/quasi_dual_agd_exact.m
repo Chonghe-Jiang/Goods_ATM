@@ -1,4 +1,4 @@
-function [solution, time, iter, obj_values, dis_agd] = quasi_dual_agd_exact(v, B, mu_0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive,epsilon_current)
+function [solution, time, iter, obj_values, dis_agd, convergence] = quasi_dual_agd_exact(v, B, mu_0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive)
     % Input:
     % v - parameter matrix v \in R^{n*m}
     % B - vector B \in R^{n*1}
@@ -31,6 +31,7 @@ function [solution, time, iter, obj_values, dis_agd] = quasi_dual_agd_exact(v, B
     mu = mu_0;
     y = mu_0;
     % q = 0.1; 
+    %%% Todo - choose the best parameter here
     q = sigma/L; % L is only multiplied here
 
     % Initialize array to store objective function values
@@ -46,45 +47,52 @@ function [solution, time, iter, obj_values, dis_agd] = quasi_dual_agd_exact(v, B
     % AGM iterations
     for iter = 1:max_iter
         % Compute the objective function values
-        obj = sum(exp(mu)) + sum(B .* max(log(v)-mu, [], 2)) - fval_solver;
-        % Compute the smoothing function values
-        max_log_v_mu = max(log(v) - repmat(mu, n, 1), [], 2);
-        % Rescale the values by subtracting the minimum
-        rescaled_log_v_mu = (log(v) - repmat(mu, n, 1) - max_log_v_mu) / delta;
+        %%% ! New gradient calculation - quasi-linear version
+        %%% ! Change in function value
+        max_log_v_mu = max([zeros(n, 1), log(v) - repmat(mu, n, 1)], [], 2); % Include 0 in the max
+        obj = sum(exp(mu)) + sum(B .* max_log_v_mu) - fval_solver;
 
-        % Compute the log-sum-exp term using the rescaled values
-        log_sum_exp_term = log(sum(exp(rescaled_log_v_mu), 2));
-        % Compute the final expression
-        f_smooth = sum(exp(mu)) + delta * sum(B .* ((max_log_v_mu/delta) + log_sum_exp_term));
+        % Compute the smoothing function values
+        % Include 0 in the max and rescale
+        temp1 = [zeros(n, 1), log(v) - repmat(mu, n, 1)]; % Include 0 in the max
+        max_temp1 = max(temp1, [], 2); % Normalize for every row
+        rescaled_temp1 = (temp1 - max_temp1) / delta; % Rescale
+        exp_temp1 = exp(rescaled_temp1); % Exponentiate
+        log_sum_exp_term = log(sum(exp_temp1, 2)); % Log-sum-exp
+
+        % Compute the final smoothing function
+        %%% ! Changes in calculatting the smooth function value
+        f_smooth = sum(exp(mu)) + delta * sum(B .* ((max_temp1 / delta) + log_sum_exp_term));
+
         % Document some values
         obj_values(iter) = obj;
-        f_smooth_values(iter) = f_smooth; 
-        dis_agd(iter) = norm(exp(mu) - p_opt_solver); 
-        % ! Stable gradient calculator
-        temp1 = log(v) - repmat(y, n, 1); % y \in R^{1*m}
-        max_temp1 = max(temp1,[],2); % Normalize for every row
-        exp_temp1 = exp((temp1 - max_temp1)/delta);
-        cal_temp1 = exp_temp1./ sum(exp_temp1,2);
-        temp_2 = sum(B.*cal_temp1); % * n*1 by n*m
-        grad_f = exp(y) - temp_2;
-        % ! Stable end
-        
+        f_smooth_values(iter) = f_smooth;
+        %%% Todo: if use this distance, we should unify log or not
+        dis_agd(iter) = norm(exp(mu) - p_opt_solver);
+
+        % Compute the gradient
+        % Include 0 in the softmax-like calculation
+        % Stable gradient calculation
+        % Include 0 in the stabilization
+        %%% ! Calculating the gradient of y
+        temp1 = [zeros(n, 1), log(v) - repmat(y, n, 1)]; % Include 0 in the max
+        max_temp1 = max(temp1, [], 2); % Normalize for every row
+        exp_temp1 = exp((temp1 - max_temp1) / delta); % Stabilized exponentials
+        cal_temp1 = exp_temp1 ./ (1 + sum(exp_temp1(:, 2:end), 2)); % Softmax-like term, excluding the 0 term
+        temp_2 = sum(B .* cal_temp1(:, 2:end)); % Exclude the 0 term for gradient
+        grad_f = exp(y) - temp_2; % Gradient
+
         % Update of mu and y
-        mu_new = P(y - (1 / L) * grad_f); %%% Todo: the new stepsize for faster convergence
+        %%% Todo: Be careful here, whether we use long step or not
+        mu_new = P(y - (4 / (L)) * grad_f); %%% Todo: previously 1/2L not 2/L - for synthetic data
         
         % Update y
         y_new = mu_new + ((1 - sqrt(q)) / (1 + sqrt(q))) * (mu_new - mu);
         
-        % if iter >= 2 && obj < epsilon
-        %     convergence = true;
-        %     break;
-        % end
-        %%% Todo - new version - like the inexact version - epsilon will be calculated later
+        %%% Todo: give a rigorous definition of the phase changing phenomena 
         if adaptive && iter>=100 && abs(f_smooth_values(iter) - f_smooth_values(iter-1)) < 1e-3 &&  abs(f_smooth_values(iter-1) - f_smooth_values(iter-2)) < 1e-3 && abs(f_smooth_values(iter-2) - f_smooth_values(iter-3)) < 1e-3 &&  abs(f_smooth_values(iter-3) - f_smooth_values(iter-4)) < 1e-3
             break;
-        end
-        
-        
+        end        
         % Update variables
         mu = mu_new;
         y = y_new;
@@ -120,14 +128,8 @@ function [solution, time, iter, obj_values, dis_agd] = quasi_dual_agd_exact(v, B
         ylabel('Iteration Distance');
         title('SAG - Iteration Convergence');
         grid on;
-        %%% Todo - Now we do not have an output for the smoothing function value
-        % subplot(3, 1, 3);
-        % plot(iterations, f_smooth_values, 'LineWidth', 2);
-        % xlabel('Iteration');
-        % ylabel('Smoothed Function Value');
-        % title('Smoothed Function Value Convergence');
-        % grid on;
     end
+    %%% Current Version - No Smoothing Output
     if plot_flag_smooth
         figure;
         iterations = 1:iter;

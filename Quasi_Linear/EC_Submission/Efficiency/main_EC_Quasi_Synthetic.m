@@ -7,16 +7,16 @@ clear
 
 %%% Todo: Start from the basic size
 % Define problem parameters
-n = 5;  % Number of rows 
-m = 5;   % Number of columns
+n = 100;  % Number of rows 
+m = 100;   % Number of columns
 B = ones(n, 1);  % Random B vector
 v = rand(n,m);
 v = v ./ sum(v, 2); 
 
 % Set common parameters
-max_iter = 10000;
+max_iter = 5000;
 max_iter_adaptive = 4500;
-epsilon = 1e-1; % Stopping criteria with epsilon %%% Todo: Change the threhold
+epsilon = 1e-2; % Stopping criteria with epsilon %%% Todo: Change the threhold
 plot_flag = true;
 
 %%% ! Box constraint - Quasi Linear Version
@@ -30,7 +30,7 @@ delta = 0.3;
 sigma = min(exp(mu_lower));
 L = exp(max(mu_upper)) + (sum(B) / delta); 
 adaptive = false;
-step_size = 1e-5; %%% Todo: Subgradient stepsize
+step_size = 1e-4; %%% Todo: Subgradient stepsize
 eta = 0.2;  %%% Todo: MD stepsize
 
 %%% * - ini of p0 and mu0
@@ -60,13 +60,13 @@ disp(['MD time: ', num2str(time_md), ' seconds']);
 
 %%% * - solve the problem by single-agd
 %%% ! Require changes for gradient and function value
-plot_flag = true;
-plot_flag_smooth = false;
-adaptive = false;
-delta_agd = 0.1; %%% Todo: AGD- smoothing parameter
-[solution_agd, time_agd, iter_agd, obj_values_agd, dis_agd, convergence_agd] = quasi_dual_agd(v, B, mu0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta_agd, plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive);
-disp(['AGD iterations: ', num2str(iter_agd)]);
-disp(['AGD time: ', num2str(time_agd), ' seconds']);
+% plot_flag = true;
+% plot_flag_smooth = false;
+% adaptive = false;
+% delta_agd = 0.1; %%% Todo: AGD- smoothing parameter
+% [solution_agd, time_agd, iter_agd, obj_values_agd, dis_agd, convergence_agd] = quasi_dual_agd(v, B, mu0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta_agd, plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive);
+% disp(['AGD iterations: ', num2str(iter_agd)]);
+% disp(['AGD time: ', num2str(time_agd), ' seconds']);
 
 %%% * - solve the problem by multiple-agd
 %%% ! Require changes for gradient and function value
@@ -82,15 +82,15 @@ disp(['Adaptive AGD time: ', num2str(total_time_adaptive), ' seconds']);
 %%% * - plot the descent graph
 x_md = 1:length(obj_values_md);
 x_subgrad = 1:length(obj_values_sub);
-x_agd = 1:length(obj_values_agd);
-% x_adaptive = 1:length(obj_values_adaptive);
+% x_agd = 1:length(obj_values_agd);
+x_adaptive = 1:length(obj_values_adaptive);
 
 figure;
 semilogy(x_md, abs(obj_values_md), '-d', 'DisplayName', 'Mirror Descent', 'LineWidth', 2); % Plot obj_mirror
 hold on;
 semilogy(x_subgrad, abs(obj_values_sub), '-d', 'DisplayName', 'Tatonnement', 'LineWidth', 2); % Plot obj_subgrad
-semilogy(x_agd, abs(obj_values_agd), '-d', 'DisplayName', 'AGD', 'LineWidth', 2);
-% semilogy(x_adaptive, abs(obj_values_adaptive), '-d', 'DisplayName', 'SGA', 'LineWidth', 2);
+% semilogy(x_agd, abs(obj_values_agd), '-d', 'DisplayName', 'AGD', 'LineWidth', 2);
+semilogy(x_adaptive, abs(obj_values_adaptive), '-d', 'DisplayName', 'SGA', 'LineWidth', 2);
 hold off;
 
 % Set font sizes and other properties

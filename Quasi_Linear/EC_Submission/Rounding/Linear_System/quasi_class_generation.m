@@ -9,16 +9,15 @@ function solution = quasi_class_generation(A, v, B)
     [row_classes, column_classes, col_class_matrices] = quasi_return_class(A, v);
     %%% ! Step 2: Do computation for every class - use the above information
     m = size(A, 2); % Number of columns in A
-    solution = zeros(1, m); % Initialize solution vector
+    solution = zeros(1, m); %! Change initialization vector since it is quasi-linear version
     %%% ! The change for quasi-linear utility
     for i = 1:length(row_classes)
         % Extract same_rows and col_class for the current class
         same_rows = row_classes{i}; % Rows in the current class
         col_class = col_class_matrices{i}; % Derived matrix for the current class
         B_class = B(same_rows, :);
-        
         % Check if index 1 belongs to col_class{i}
-        if ismember(1, col_class{i})
+        if ismember(1, col_class) % ! col_class is already generated
             % Use quasi_gap_basis_zero if index 1 is in col_class{i}
             [gap_vector, mu_basis] = quasi_gap_basis_zero(col_class, B_class);
         else
@@ -30,5 +29,6 @@ function solution = quasi_class_generation(A, v, B)
         active_cols = find(gap_vector ~= -inf);
         solution(active_cols) = mu_basis + gap_vector(active_cols);
     end
+    solution = solution(2:end); % ! Only choose the 2:end result
 end
 %%% ! This is a new approach for the gap calculation

@@ -6,16 +6,16 @@ clear
 % Set random seed for reproducibility
 
 % Define problem parameters
-n = 5;  % Number of rows %%% Todo: Change the size
-m = 5;   % Number of columns
-B = rand(n, 1);  % Random B vector
+n = 500;  % Number of rows %%% Todo: Change the size
+m = 500;   % Number of columns
+B = ones(n,1);
 v = rand(n,m);
 v = v ./ sum(v, 2); 
 
 % Set common parameters
-max_iter = 10000;
+max_iter = 5000;
 max_iter_adaptive = 4500;
-epsilon = 1e-1; % Stopping criteria with epsilon %%% Todo: Change the threhold
+epsilon = 1e-2; % Stopping criteria with epsilon %%% Todo: Change the threhold
 plot_flag = true;
 
 %%% * Box constraint  
@@ -53,43 +53,43 @@ disp(['Subgradient iterations: ', num2str(iter_sub)]);
 disp(['MD iterations: ', num2str(iter_md)]);
 disp(['MD time: ', num2str(time_md), ' seconds']);
 
-%%% * - solve the problem by single-agd
-plot_flag = true;
-plot_flag_smooth = false;
-adaptive = false;
-delta_agd = 0.003; %%% Todo: AGD- smoothing parameter
-[solution_agd, time_agd, iter_agd, obj_values_agd, dis_agd, convergence_agd] = linear_dual_agd(v, B, mu0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta_agd, plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive);
-disp(['AGD iterations: ', num2str(iter_agd)]);
-disp(['AGD time: ', num2str(time_agd), ' seconds']);
+% %%% * - solve the problem by single-agd
+% plot_flag = true;
+% plot_flag_smooth = false;
+% adaptive = false;
+% delta_agd = delta; %%% Todo: AGD- smoothing parameter
+% [solution_agd, time_agd, iter_agd, obj_values_agd, dis_agd, convergence_agd] = linear_dual_agd(v, B, mu0, max_iter, L, sigma, epsilon, mu_lower, mu_upper, delta_agd, plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive);
+% disp(['AGD iterations: ', num2str(iter_agd)]);
+% disp(['AGD time: ', num2str(time_agd), ' seconds']);
 
 %%% * - solve the problem by multiple-agd
-% adaptive_plot_flag = true;  % Set to true if you want to plot the results
-% plot_flag = false;
-% plot_flag_smooth = false;
-% adaptive = true;
-% phase_num = 20; %%% Todo: SGR - parameter
-% [solution_adaptive, total_time_adaptive, total_iter_adaptive, obj_values_adaptive, dis_adaptive] = linear_dual_adaptive(v, B, mu0, max_iter_adaptive, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, adaptive_plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive, phase_num);
-% disp(['Adaptive AGD iterations: ', num2str(total_iter_adaptive)]);
-% disp(['Adaptive AGD time: ', num2str(total_time_adaptive), ' seconds']);
+adaptive_plot_flag = true;  % Set to true if you want to plot the results
+plot_flag = false;
+plot_flag_smooth = false;
+adaptive = true;
+phase_num = 20; %%% Todo: SGR - parameter
+[solution_adaptive, total_time_adaptive, total_iter_adaptive, obj_values_adaptive, dis_adaptive] = linear_dual_adaptive(v, B, mu0, max_iter_adaptive, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, adaptive_plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive, phase_num);
+disp(['Adaptive AGD iterations: ', num2str(total_iter_adaptive)]);
+disp(['Adaptive AGD time: ', num2str(total_time_adaptive), ' seconds']);
 
 %%% * - plot the descent graph
 x_md = 1:length(obj_values_md);
 x_subgrad = 1:length(obj_values_sub);
-x_agd = 1:length(obj_values_agd);
-% x_adaptive = 1:length(obj_values_adaptive);
+% x_agd = 1:length(obj_values_agd);
+x_adaptive = 1:length(obj_values_adaptive);
 
 figure;
 semilogy(x_md, abs(obj_values_md), '-d', 'DisplayName', 'Mirror Descent', 'LineWidth', 2); % Plot obj_mirror
 hold on;
 semilogy(x_subgrad, abs(obj_values_sub), '-d', 'DisplayName', 'Tatonnement', 'LineWidth', 2); % Plot obj_subgrad
-semilogy(x_agd, abs(obj_values_agd), '-d', 'DisplayName', 'AGD', 'LineWidth', 2);
-% semilogy(x_adaptive, abs(obj_values_adaptive), '-d', 'DisplayName', 'SGA', 'LineWidth', 2);
+% semilogy(x_agd, abs(obj_values_agd), '-d', 'DisplayName', 'AGD', 'LineWidth', 2);
+semilogy(x_adaptive, abs(obj_values_adaptive), '-d', 'DisplayName', 'ATM', 'LineWidth', 2);
 hold off;
 
 % Set font sizes and other properties
 set(gca, 'FontSize', 15); % Set axis font size
 xlabel('Iteration', 'FontSize', 25); % X-axis label with larger font size
-ylabel('Objective Value Gap', 'FontSize', 25); % Y-axis label with larger font size
+ylabel('Value Gap', 'FontSize', 25); % Y-axis label with larger font size
 title(['n=', num2str(n), ', m=', num2str(m)], 'FontSize', 25); % Graph title with larger font size
 legend show; % Show legend
 grid on; % Enable grid

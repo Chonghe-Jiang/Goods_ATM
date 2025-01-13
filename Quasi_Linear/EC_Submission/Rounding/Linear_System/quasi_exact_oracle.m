@@ -10,13 +10,14 @@ function [oracle_result, optimal_ce, optimal_value, sum_exp_mu] = quasi_exact_or
 
     %%% ! Step 1: Compute the gap and activation matrix
     %%% ! Step 2: Quasi-Linear Utility modification - we should input new v and new mu
-    v = [ones(n,1),v]; % add a column
+    v = [ones(length(B),1),v]; % add a column
     mu = [0,mu]; % add an element
     [~ ,~ , activation_matrix] = quasi_compute_gap(v, B, mu, radius_current);
 
     %%% ! Step 2: Generate the solution using linear_class_generation: two stages inside
     solution = quasi_class_generation(activation_matrix, v, B);
     % Step 3: Check feasibility using linear_max_flow
+    solution = [0,solution]; % Todo: check whether reasonable or not to do this for solution
     [is_feasible, optimal_value, sum_exp_mu] = quasi_max_flow(solution, B, v, activation_matrix);
     % Step 4: Return the appropriate results based on feasibility
     if is_feasible
