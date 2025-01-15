@@ -1,0 +1,6 @@
+acc size data parameter 
+1e-3 50 rand 0.1; 8/L; 3,3,2; 100 inner iter;initial 0.3
+1e-3 100 rand 0.1; 8/L; 3,3,2; 200 inner iter；initial 0.3
+initialization with 0.05 and well solve the high-dimensional problem.
+
+The result is sooo good?

@@ -5,8 +5,8 @@ clc
 clear
 
 % Define problem parameters
-n = 100;  % Number of rows %%% Todo: Change the size
-m = 100;   % Number of columns
+n = 300;  % Number of rows %%% Todo: Change the size
+m = 300;   % Number of columns
 B = ones(n,1);
 
 % Define the folder name
@@ -19,7 +19,7 @@ if ~exist(dataset_folder, 'dir')
 end
 
 % Generate the filename for v based on n and m
-v_filename = sprintf('v_linear_integer_%d_%d.mat', n, m);
+v_filename = sprintf('v_linear_rand_%d_%d.mat', n, m);
 v_filepath = fullfile(dataset_folder, v_filename); % Full path to the file
 
 % Check if the file exists. If it does, load 'v' from the file. Otherwise, generate 'v' and save it.
@@ -27,17 +27,17 @@ if exist(v_filepath, 'file') == 2
     load(v_filepath, 'v');  % Load 'v' from the file
     disp(['Loaded v from ', v_filepath]);
 else
-    % v = rand(n,m);
-    v = randi([1, 10], n, m); % Draw valuations from integer uniform distribution
+    v = rand(n,m);
+    % v = randi([1, 10], n, m); % Draw valuations from integer uniform distribution
     % v = exprnd(10, n, m); 
     % v = lognrnd(0, 10, n, m); % Draw valuations from log-normal distribution
-    % v = v ./ sum(v, 2); 
+    v = v ./ sum(v, 2); 
     save(v_filepath, 'v');  % Save 'v' to a file for future use
     disp(['Generated v and saved to ', v_filepath]);
 end
 
 % Generate the filename for solver results based on n and m
-solver_filename = sprintf('solver_linear_integer_%d_%d.mat', n, m);
+solver_filename = sprintf('solver_linear_rand_%d_%d.mat', n, m);
 solver_filepath = fullfile(dataset_folder, solver_filename); % Full path to the file
 
 % Check if the solver results file exists. If it does, load the results. Otherwise, solve and save the results.
@@ -130,3 +130,12 @@ ylabel('Value Gap', 'FontSize', 25); % Y-axis label with larger font size
 title(['n=', num2str(n), ', m=', num2str(m)], 'FontSize', 25); % Graph title with larger font size
 legend show; % Show legend
 grid on; % Enable grid
+
+distance_md_to_solver = norm(solution_md - p_opt_solver); % Distance for Mirror Descent
+distance_sub_to_solver = norm(solution_sub - p_opt_solver); % Distance for Subgradient
+distance_adaptive_to_solver = norm(exp(solution_adaptive) - p_opt_solver); % Distance for Adaptive AGD
+
+% Print the distances
+disp(['Distance between Mirror Descent solution and solver solution: ', num2str(distance_md_to_solver)]);
+disp(['Distance between Subgradient solution and solver solution: ', num2str(distance_sub_to_solver)]);
+disp(['Distance between Adaptive AGD solution and solver solution: ', num2str(distance_adaptive_to_solver)]);

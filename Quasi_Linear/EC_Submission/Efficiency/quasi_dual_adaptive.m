@@ -27,6 +27,7 @@ for phase = 1:phase_num
     %%% Todo - note that the stopping criteria (i.e. convergence) and the switching mechanism have not been available
     % Check for convergence
     if convergence
+        solution_adaptive = solution_phase;
         break;
     end
     
