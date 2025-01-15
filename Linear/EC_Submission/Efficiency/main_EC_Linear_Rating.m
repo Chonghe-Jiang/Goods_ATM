@@ -11,7 +11,7 @@ B = ones(n,1);
 % Set common parameters
 max_iter = 10000;
 max_iter_adaptive = 4500;
-epsilon = 1e-1; % Stopping criteria with epsilon %%% Todo: Real-data precision
+epsilon = 1e-3; % Stopping criteria with epsilon %%% Todo: Real-data precision
 plot_flag = true;
 
 %%% * Box constraint  
@@ -21,7 +21,7 @@ mu_lower = log(p_lower);
 mu_upper = log(p_upper);
 
 %%% * Parameter for convexity and smoothness and stepsize
-delta = 0.8;  % Todo: Smoothing parameter
+delta = 0.3;  % Todo: Smoothing parameter
 sigma = min(exp(mu_lower));
 L = exp(max(mu_upper)) + (sum(B) / delta); 
 adaptive = false;
@@ -64,7 +64,7 @@ adaptive_plot_flag = true;
 plot_flag = false;
 plot_flag_smooth = false;
 adaptive = true;
-phase_num = 15;
+phase_num = 20;
 [solution_adaptive, total_time_adaptive, total_iter_adaptive, obj_values_adaptive, dis_adaptive] = linear_dual_adaptive(v, B, mu0, max_iter_adaptive, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, adaptive_plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive, phase_num);
 % disp(['Adaptive AGD final gap: ', num2str(obj_adaptive(end))]);
 disp(['Adaptive AGD iterations: ', num2str(total_iter_adaptive)]);

@@ -37,7 +37,7 @@ for phase = 1:phase_num
         L = exp(max(mu_upper)) + sum(B) / delta;
         mu_0 = solution_phase;
     elseif phase <= 5
-        delta = delta / 3; % Todo: previous 2 - for real data
+        delta = delta / 3; % Todo: previous 3 - for real data
         L = exp(max(mu_upper)) + sum(B) / delta;
         mu_0 = solution_phase;
     else

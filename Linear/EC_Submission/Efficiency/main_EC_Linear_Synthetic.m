@@ -3,19 +3,57 @@
 %%% ! Optimal Version for Submission
 clc
 clear
-% Set random seed for reproducibility
 
 % Define problem parameters
 n = 500;  % Number of rows %%% Todo: Change the size
 m = 500;   % Number of columns
 B = ones(n,1);
-v = rand(n,m);
-v = v ./ sum(v, 2); 
+
+% Define the folder name
+dataset_folder = 'synthetica_dataset';
+
+% Create the folder if it doesn't exist
+if ~exist(dataset_folder, 'dir')
+    mkdir(dataset_folder);
+    disp(['Created folder: ', dataset_folder]);
+end
+
+% Generate the filename for v based on n and m
+v_filename = sprintf('v_linear_rand_%d_%d.mat', n, m);
+v_filepath = fullfile(dataset_folder, v_filename); % Full path to the file
+
+% Check if the file exists. If it does, load 'v' from the file. Otherwise, generate 'v' and save it.
+if exist(v_filepath, 'file') == 2
+    load(v_filepath, 'v');  % Load 'v' from the file
+    disp(['Loaded v from ', v_filepath]);
+else
+    v = rand(n,m);
+    v = v ./ sum(v, 2); 
+    save(v_filepath, 'v');  % Save 'v' to a file for future use
+    disp(['Generated v and saved to ', v_filepath]);
+end
+
+% Generate the filename for solver results based on n and m
+solver_filename = sprintf('solver_linear_rand_%d_%d.mat', n, m);
+solver_filepath = fullfile(dataset_folder, solver_filename); % Full path to the file
+
+% Check if the solver results file exists. If it does, load the results. Otherwise, solve and save the results.
+if exist(solver_filepath, 'file') == 2
+    load(solver_filepath, 'p_opt_solver', 'beta_opt', 'fval_solver', 'solve_time');  % Load solver results from the file
+    disp(['Loaded solver results from ', solver_filepath]);
+else
+    % Solve the problem using the solver
+    [p_opt_solver, beta_opt, fval_solver, solve_time] = linear_dual_solver(n, m, B, v);
+    save(solver_filepath, 'p_opt_solver', 'beta_opt', 'fval_solver', 'solve_time');  % Save solver results to a file
+    disp(['Solved and saved solver results to ', solver_filepath]);
+end
+disp(['Solver time: ', num2str(solve_time), ' seconds']);
+p_opt_solver = p_opt_solver'; % Transfer to a row vector
 
 % Set common parameters
-max_iter = 5000;
+max_iter = 8000;
 max_iter_adaptive = 4500;
-epsilon = 1e-2; % Stopping criteria with epsilon %%% Todo: Change the threhold
+epsilon = 1e-3; % Stopping criteria with epsilon %%% Todo: Change the threhold
 plot_flag = true;
 
 %%% * Box constraint  
@@ -25,22 +63,17 @@ mu_lower = log(p_lower);
 mu_upper = log(p_upper);
 
 %%% * Parameter for convexity and smoothness and stepsize
-delta = 0.3;  
+delta = 0.1;  
 sigma = min(exp(mu_lower));
 L = exp(max(mu_upper)) + (sum(B) / delta); 
 adaptive = false;
-step_size = 1e-3; %%% Todo: Subgradient stepsize
-eta = 0.2;  %%% Todo: MD stepsize
+step_size = 1e-2; %%% Todo: Subgradient stepsize
+eta = 1;  %%% Todo: MD stepsize
 
 %%% * - ini of p0 and mu0
 p0 = linear_init_gd(p_lower,p_upper,sum(B));
 mu0 = log(p0); %
 x0 = linear_init_md(p0,B);
-
-%%% * - solve the problem by solver
-[p_opt_solver, beta_opt, fval_solver, solve_time] = linear_dual_solver(n, m, B, v);
-disp(['Solver time: ', num2str(solve_time), ' seconds']);
-p_opt_solver = p_opt_solver'; % Transfer to a row vector
 
 %%% * - solve the problem by subgradient
 [solution_sub, obj_values_sub, dis_sub, time_sub, iter_sub] = linear_dual_subgradient(v, B, p0, max_iter, step_size, epsilon, plot_flag, p_opt_solver, fval_solver);
@@ -49,6 +82,7 @@ disp(['Subgradient time: ', num2str(time_sub), ' seconds']);
 disp(['Subgradient iterations: ', num2str(iter_sub)]);
 
 %%% * - solve the problem by mirror descent
+eta = 0.2;
 [solution_md, time_md, iter_md, obj_values_md, distance_md] = linear_primal_md(v, B, x0, eta, epsilon, max_iter, plot_flag, p_opt_solver, fval_solver);
 disp(['MD iterations: ', num2str(iter_md)]);
 disp(['MD time: ', num2str(time_md), ' seconds']);

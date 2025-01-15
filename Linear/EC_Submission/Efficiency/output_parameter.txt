@@ -1,33 +1,36 @@
 market type, error threshold, instance size, data generation type
-Low accuracy:
-linear, 0.1, 50, rand                      delta=0.01   
-linear, 0.1, 200, rand                     delta=0.005    
-linear, 0.1, 500, rand                     delta=0.005
-
-linear, 0.1, 50, randi                     
-linear, 0.1, 50, logrand
-linear, 0.1, 50, exp
-
-linear, 0.1, 200, randi
-linear, 0.1, 200, logrand
-linear, 0.1, 200, exp
-
-linear, 0.1, 500, randi               
-linear, 0.1, 500, logrand
-linear, 0.1, 500, exp
 
 High accuracy:
-linear, 0.01, 50, rand
-linear, 0.01, 50, randi
-linear, 0.01, 50, logrand
-linear, 0.01, 50, exp
+linear, 1e-3, 50, rand    3/1.5/1.5 2/L; inner stepsize; 150 inner step
+linear, 1e-3, 50, randi   3/3/1.5 8/L; inner stepsize; 50 inner step
+linear, 1e-3, 50, logrand
+linear, 1e-3, 50, exp
 
-linear, 0.01, 200, rand
-linear, 0.01, 200, randi
-linear, 0.01, 200, logrand
-linear, 0.01, 200, exp
+linear, 1e-3, 300, rand   3/2/1.5 2/L; inner stepsize; 300 inner step
+linear, 1e-3, 300, randi
+linear, 1e-3, 300, logrand
+linear, 1e-3, 300, exp
 
-linear, 0.01, 500, rand
-linear, 0.01, 500, randi
-linear, 0.01, 500, logrand
-linear, 0.01, 500, exp
+linear, 1e-3, 500, rand   3/2/1.5 2/L; inner stepsize; 300 inner step
+linear, 1e-3, 500, randi
+linear, 1e-3, 500, logrand
+linear, 1e-3, 500, exp
+
+High accuracy:
+linear, 1e-4, 50, rand    3/1.5/1.5 2/L; inner stepsize; 150 inner step
+linear, 1e-4, 50, randi 
+linear, 1e-4, 50, logrand
+linear, 1e-4, 50, exp
+
+linear, 1e-4, 300, rand   3/2/1.5 2/L; inner stepsize; 300 inner step
+linear, 1e-4, 300, randi
+linear, 1e-4, 300, logrand
+linear, 1e-4, 300, exp
+
+linear, 1e-4, 500, rand   3/3/1.5 8/L; inner stepsize; 500 inner step
+linear, 1e-4, 500, randi  
+linear, 1e-4, 500, logrand
+linear, 1e-4, 500, exp
+
+Real data
+3/3/1.5; 8/L inner stepsize; 500 inner step
