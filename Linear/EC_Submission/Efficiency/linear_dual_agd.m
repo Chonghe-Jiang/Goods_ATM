@@ -79,7 +79,7 @@ function [solution, time, iter, obj_values, dis_agd, convergence] = linear_dual_
 
         % Update of mu and y
         %%% Todo: Be careful here, whether we use long step or not
-        mu_new = P(y - (8 / (L)) * grad_f); %%% Todo: previously 1/2L not 2/L - for synthetic data
+        mu_new = P(y - (30 / (L)) * grad_f); %%% Todo: previously 1/2L not 2/L - for synthetic data
         
         % Update y
         y_new = mu_new + ((1 - sqrt(q)) / (1 + sqrt(q))) * (mu_new - mu);
@@ -90,7 +90,7 @@ function [solution, time, iter, obj_values, dis_agd, convergence] = linear_dual_
             break;
         end
         %%% Todo: give a rigorous definition of the phase changing phenomena 
-        if adaptive && iter>=100 && abs(f_smooth_values(iter) - f_smooth_values(iter-1)) < 1e-3 &&  abs(f_smooth_values(iter-1) - f_smooth_values(iter-2)) < 1e-3 && abs(f_smooth_values(iter-2) - f_smooth_values(iter-3)) < 1e-3 &&  abs(f_smooth_values(iter-3) - f_smooth_values(iter-4)) < 1e-3
+        if adaptive && iter>=15 && abs(f_smooth_values(iter) - f_smooth_values(iter-1)) < 1e-3 &&  abs(f_smooth_values(iter-1) - f_smooth_values(iter-2)) < 1e-3 && abs(f_smooth_values(iter-2) - f_smooth_values(iter-3)) < 1e-3 &&  abs(f_smooth_values(iter-3) - f_smooth_values(iter-4)) < 1e-3
             break;
         end        
         % Update variables

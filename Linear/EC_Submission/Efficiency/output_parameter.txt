@@ -1,36 +1,30 @@
 market type, error threshold, instance size, data generation type
-
+without further explnation: starting smoothing parameter - 0.1
 High accuracy:
 linear, 1e-3, 50, rand    3/1.5/1.5 2/L; inner stepsize; 150 inner step
-linear, 1e-3, 50, randi   3/3/1.5 8/L; inner stepsize; 50 inner step
-linear, 1e-3, 50, logrand
-linear, 1e-3, 50, exp
+linear, 1e-3, 50, randi   3/3/1.5 16/L; inner stepsize; 20 inner step
+linear, 1e-3, 50, exp     3/3/1.5 16/L; inner stepsize; 100 inner step
 
 linear, 1e-3, 300, rand   3/2/1.5 2/L; inner stepsize; 300 inner step
-linear, 1e-3, 300, randi
-linear, 1e-3, 300, logrand
-linear, 1e-3, 300, exp
+linear, 1e-3, 300, randi  3/3/1.5 16/L; inner stepsize; 15 inner step
+linear, 1e-3, 300, exp    3/3/1.5 16/L; inner stepsize; 150 inner step
 
 linear, 1e-3, 500, rand   3/2/1.5 2/L; inner stepsize; 300 inner step
-linear, 1e-3, 500, randi
-linear, 1e-3, 500, logrand
-linear, 1e-3, 500, exp
+linear, 1e-3, 500, randi  strange
+linear, 1e-3, 500, exp    3/3/1.5 16/L; inner stepsize; 300 inner step
 
 High accuracy:
 linear, 1e-4, 50, rand    3/1.5/1.5 2/L; inner stepsize; 150 inner step
-linear, 1e-4, 50, randi 
-linear, 1e-4, 50, logrand
-linear, 1e-4, 50, exp
+linear, 1e-4, 50, randi   3/3/1.5 30/L; inner stepsize; 25 inner step 0.05 initial
+linear, 1e-4, 50, exp     3/3/1.5 16/L; inner stepsize; 150 inner step
 
 linear, 1e-4, 300, rand   3/2/1.5 2/L; inner stepsize; 300 inner step
-linear, 1e-4, 300, randi
-linear, 1e-4, 300, logrand
-linear, 1e-4, 300, exp
+linear, 1e-4, 300, randi  3/3/1.5 30/L; inner stepsize; 25 inner step 0.05 initial
+linear, 1e-4, 300, exp    3/3/1.5 16/L; inner stepsize; 300 inner step
 
 linear, 1e-4, 500, rand   3/3/1.5 8/L; inner stepsize; 500 inner step
 linear, 1e-4, 500, randi  
-linear, 1e-4, 500, logrand
-linear, 1e-4, 500, exp
+linear, 1e-4, 500, exp    3/3/1.5 16/L; inner stepsize; 300 inner step
 
 Real data
 3/3/1.5; 8/L inner stepsize; 500 inner step

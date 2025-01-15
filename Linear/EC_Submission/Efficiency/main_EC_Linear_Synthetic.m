@@ -5,8 +5,8 @@ clc
 clear
 
 % Define problem parameters
-n = 500;  % Number of rows %%% Todo: Change the size
-m = 500;   % Number of columns
+n = 100;  % Number of rows %%% Todo: Change the size
+m = 100;   % Number of columns
 B = ones(n,1);
 
 % Define the folder name
@@ -19,7 +19,7 @@ if ~exist(dataset_folder, 'dir')
 end
 
 % Generate the filename for v based on n and m
-v_filename = sprintf('v_linear_rand_%d_%d.mat', n, m);
+v_filename = sprintf('v_linear_integer_%d_%d.mat', n, m);
 v_filepath = fullfile(dataset_folder, v_filename); % Full path to the file
 
 % Check if the file exists. If it does, load 'v' from the file. Otherwise, generate 'v' and save it.
@@ -27,14 +27,17 @@ if exist(v_filepath, 'file') == 2
     load(v_filepath, 'v');  % Load 'v' from the file
     disp(['Loaded v from ', v_filepath]);
 else
-    v = rand(n,m);
-    v = v ./ sum(v, 2); 
+    % v = rand(n,m);
+    v = randi([1, 10], n, m); % Draw valuations from integer uniform distribution
+    % v = exprnd(10, n, m); 
+    % v = lognrnd(0, 10, n, m); % Draw valuations from log-normal distribution
+    % v = v ./ sum(v, 2); 
     save(v_filepath, 'v');  % Save 'v' to a file for future use
     disp(['Generated v and saved to ', v_filepath]);
 end
 
 % Generate the filename for solver results based on n and m
-solver_filename = sprintf('solver_linear_rand_%d_%d.mat', n, m);
+solver_filename = sprintf('solver_linear_integer_%d_%d.mat', n, m);
 solver_filepath = fullfile(dataset_folder, solver_filename); % Full path to the file
 
 % Check if the solver results file exists. If it does, load the results. Otherwise, solve and save the results.
@@ -53,7 +56,7 @@ p_opt_solver = p_opt_solver'; % Transfer to a row vector
 % Set common parameters
 max_iter = 8000;
 max_iter_adaptive = 4500;
-epsilon = 1e-3; % Stopping criteria with epsilon %%% Todo: Change the threhold
+epsilon = 1e-4; % Stopping criteria with epsilon %%% Todo: Change the threhold
 plot_flag = true;
 
 %%% * Box constraint  
@@ -67,7 +70,7 @@ delta = 0.1;
 sigma = min(exp(mu_lower));
 L = exp(max(mu_upper)) + (sum(B) / delta); 
 adaptive = false;
-step_size = 1e-2; %%% Todo: Subgradient stepsize
+step_size = 1e-3; %%% Todo: Subgradient stepsize
 eta = 1;  %%% Todo: MD stepsize
 
 %%% * - ini of p0 and mu0
