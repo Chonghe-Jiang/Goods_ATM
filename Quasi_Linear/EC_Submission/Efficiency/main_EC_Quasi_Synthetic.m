@@ -27,11 +27,11 @@ if exist(v_filepath, 'file') == 2
     load(v_filepath, 'v');  % Load 'v' from the file
     disp(['Loaded v from ', v_filepath]);
 else
-    v = rand(n, m); 
+    v = 5+20*rand(n, m); 
     % v = randi([1, 10], n, m); % Draw valuations from integer uniform distribution
     % v = exprnd(10, n, m); 
     % v = lognrnd(0, 10, n, m); % Draw valuations from log-normal distribution
-    v = v ./ sum(v, 2); 
+    % v = v ./ sum(v, 2); 
     save(v_filepath, 'v');  % Save 'v' to a file for future use
     disp(['Generated v and saved to ', v_filepath]);
 end
@@ -66,16 +66,16 @@ mu_lower = log(p_lower);
 mu_upper = log(p_upper);
 
 %%% * Parameter for convexity and smoothness and stepsize
-delta = 0.05;  
+delta = 0.3;  
 sigma = min(exp(mu_lower));
 L = exp(max(mu_upper)) + (sum(B) / delta); 
 adaptive = false;
-step_size = 1e-8; %%% Todo: Subgradient stepsize
-eta = 1;  %%% Todo: MD stepsize
+step_size = 1e-2; %%% Todo: Subgradient stepsize
+eta = 0.2;  %%% Todo: MD stepsize
 
 %%% * - ini of p0 and mu0
 p0 = quasi_init_gd(p_lower,p_upper,sum(B));
-% p0 = 1/(2*m) * ones(1,m);
+% p0 = 1/2 * (p_upper + p_lower);
 mu0 = log(p0); %
 x0 = quasi_init_md(p0,B);
 
