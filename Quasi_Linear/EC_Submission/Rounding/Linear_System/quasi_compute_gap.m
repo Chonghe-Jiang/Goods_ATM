@@ -1,4 +1,4 @@
-function [gap, gap_array, activation_matrix] = linear_compute_gap(v, B, mu, radius_current)
+function [gap, gap_array, activation_matrix] = quasi_compute_gap(v, B, mu, radius_current)
     [n, m] = size(v);
     matrix = log(v) - mu;
     top_value = max(matrix, [], 2);

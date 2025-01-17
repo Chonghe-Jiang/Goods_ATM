@@ -78,7 +78,7 @@ function [solution, time, iter, obj_values, dis_agd, convergence] = quasi_dual_a
         temp1 = [zeros(n, 1), log(v) - repmat(y, n, 1)]; % Include 0 in the max
         max_temp1 = max(temp1, [], 2); % Normalize for every row
         exp_temp1 = exp((temp1 - max_temp1) / delta); % Stabilized exponentials
-        cal_temp1 = exp_temp1 ./ (1 + sum(exp_temp1(:, 2:end), 2)); % Softmax-like term, excluding the 0 term
+        cal_temp1 = exp_temp1 ./ sum(exp_temp1, 2); % Softmax-like term, excluding the 0 term
         temp_2 = sum(B .* cal_temp1(:, 2:end)); % Exclude the 0 term for gradient
         grad_f = exp(y) - temp_2; % Gradient
 
@@ -90,7 +90,7 @@ function [solution, time, iter, obj_values, dis_agd, convergence] = quasi_dual_a
         y_new = mu_new + ((1 - sqrt(q)) / (1 + sqrt(q))) * (mu_new - mu);
         
         %%% Todo: give a rigorous definition of the phase changing phenomena 
-        if adaptive && iter>=100 && abs(f_smooth_values(iter) - f_smooth_values(iter-1)) < 1e-3 &&  abs(f_smooth_values(iter-1) - f_smooth_values(iter-2)) < 1e-3 && abs(f_smooth_values(iter-2) - f_smooth_values(iter-3)) < 1e-3 &&  abs(f_smooth_values(iter-3) - f_smooth_values(iter-4)) < 1e-3
+        if adaptive && iter>=500 && abs(f_smooth_values(iter) - f_smooth_values(iter-1)) < 1e-3 &&  abs(f_smooth_values(iter-1) - f_smooth_values(iter-2)) < 1e-3 && abs(f_smooth_values(iter-2) - f_smooth_values(iter-3)) < 1e-3 &&  abs(f_smooth_values(iter-3) - f_smooth_values(iter-4)) < 1e-3
             break;
         end        
         % Update variables

@@ -8,7 +8,7 @@ function [row_classes, column_classes, col_class_matrices] = linear_return_class
     % col_class_matrices - a cell array where each cell contains the derived matrix for a row class
 
     % Step 1: Find row classes (connected components) in A
-    row_classes = linear_equi(A);
+    row_classes = linear_equi_optimized(A);
     for i = 1:numel(row_classes)
         row_classes{i} = sort(row_classes{i});
     end

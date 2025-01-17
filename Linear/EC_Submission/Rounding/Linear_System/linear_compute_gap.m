@@ -11,4 +11,5 @@ function [gap, gap_array, activation_matrix] = linear_compute_gap(v, B, mu, radi
     delta_threshold = radius_current*2;
     matrix = log(v) - mu;
     activation_matrix = (matrix - top_value) >= -delta_threshold;
+    activation_matrix = sparse(activation_matrix);
 end
