@@ -5,20 +5,22 @@ clc
 clear
 
 % Define problem parameters
-n = 300;  % Number of rows %%% Todo: Change the size
-m = 300;   % Number of columns
+n = 500;  % Number of rows %%% Todo: Change the size
+m = 500;   % Number of columns
 B = ones(n,1);
 
 % Define the folder name
 dataset_folder = 'synthetica_dataset';
 
-% Create the folder if it doesn't exist
-if ~exist(dataset_folder, 'dir')
-    mkdir(dataset_folder);
-    disp(['Created folder: ', dataset_folder]);
-end
+% Todo: change the epsilon threhold here
+max_iter = 11000;
+max_iter_adaptive = 4500;
+epsilon = 1e-4; % Stopping criteria with epsilon %%% Todo: Change the threhold
+plot_flag = true;
 
-% Generate the filename for v based on n and m
+% Generate the filename for solver results based on n and m
+solver_filename = sprintf('solver_linear_rand_%d_%d.mat', n, m);
+solver_filepath = fullfile(dataset_folder, solver_filename); % Full path to the file
 v_filename = sprintf('v_linear_rand_%d_%d.mat', n, m);
 v_filepath = fullfile(dataset_folder, v_filename); % Full path to the file
 
@@ -36,9 +38,7 @@ else
     disp(['Generated v and saved to ', v_filepath]);
 end
 
-% Generate the filename for solver results based on n and m
-solver_filename = sprintf('solver_linear_rand_%d_%d.mat', n, m);
-solver_filepath = fullfile(dataset_folder, solver_filename); % Full path to the file
+
 
 % Check if the solver results file exists. If it does, load the results. Otherwise, solve and save the results.
 if exist(solver_filepath, 'file') == 2
@@ -52,12 +52,6 @@ else
 end
 disp(['Solver time: ', num2str(solve_time), ' seconds']);
 p_opt_solver = p_opt_solver'; % Transfer to a row vector
-
-% Set common parameters
-max_iter = 8000;
-max_iter_adaptive = 4500;
-epsilon = 1e-4; % Stopping criteria with epsilon %%% Todo: Change the threhold
-plot_flag = true;
 
 %%% * Box constraint  
 p_lower = max(v .* B ./ sum(abs(v),2));
@@ -110,23 +104,31 @@ disp(['Adaptive AGD iterations: ', num2str(total_iter_adaptive)]);
 disp(['Adaptive AGD time: ', num2str(total_time_adaptive), ' seconds']);
 
 %%% * - plot the descent graph
+% Determine the smallest length among the three data sets
+min_length = min([length(obj_values_md), length(obj_values_sub), length(obj_values_adaptive)]);
+
+% Truncate the data sets to the smallest length
+obj_values_md = obj_values_md(1:min_length);
+obj_values_sub = obj_values_sub(1:min_length);
+obj_values_adaptive = obj_values_adaptive(1:min_length);
+
+% Create x-axis values
 x_md = 1:length(obj_values_md);
 x_subgrad = 1:length(obj_values_sub);
-% x_agd = 1:length(obj_values_agd);
 x_adaptive = 1:length(obj_values_adaptive);
 
+% Plotting
 figure;
 semilogy(x_md, abs(obj_values_md), '-d', 'DisplayName', 'Mirror Descent', 'LineWidth', 2); % Plot obj_mirror
 hold on;
 semilogy(x_subgrad, abs(obj_values_sub), '-d', 'DisplayName', 'Tatonnement', 'LineWidth', 2); % Plot obj_subgrad
-% semilogy(x_agd, abs(obj_values_agd), '-d', 'DisplayName', 'AGD', 'LineWidth', 2);
-semilogy(x_adaptive, abs(obj_values_adaptive), '-d', 'DisplayName', 'ATM', 'LineWidth', 2);
+semilogy(x_adaptive, abs(obj_values_adaptive), '-d', 'DisplayName', 'ATM', 'LineWidth', 2); % Plot obj_adaptive
 hold off;
 
 % Set font sizes and other properties
 set(gca, 'FontSize', 15); % Set axis font size
 xlabel('Iteration', 'FontSize', 25); % X-axis label with larger font size
-ylabel('Value Gap', 'FontSize', 25); % Y-axis label with larger font size
+ylabel('Objective Value Gap', 'FontSize', 25); % Y-axis label with larger font size
 title(['n=', num2str(n), ', m=', num2str(m)], 'FontSize', 25); % Graph title with larger font size
 legend show; % Show legend
 grid on; % Enable grid

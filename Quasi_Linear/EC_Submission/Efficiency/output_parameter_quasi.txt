@@ -1,6 +1,12 @@
 acc size data parameter 
-1e-3 50 rand 0.1; 8/L; 3,3,2; 100 inner iter;initial 0.3
-1e-3 100 rand 0.1; 8/L; 3,3,2; 200 inner iter；initial 0.3
-initialization with 0.05 and well solve the high-dimensional problem.
+1e-3 50 20rand+5 0.1; 8/L; 3,3,2; 50 inner iter;initial 0.1
+1e-3 100 same but inner threhold 100
+1e-3 300 same but inner threhold 100
+1e-3 500 same but inner threhold 200
 
-The result is sooo good?
+1e-4 50 same but inner threhold 150
+1e-4 100 same but inner threhold 200
+1e-4 300 same but inner threhold 100
+1e-4 500 same but inner threhold 200
+
+
