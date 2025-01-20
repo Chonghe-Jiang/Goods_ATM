@@ -22,6 +22,7 @@ function [oracle_result, optimal_ce, optimal_value, sum_exp_mu] = quasi_exact_or
     % Step 4: Return the appropriate results based on feasibility
     if is_feasible
         oracle_result = true;
+        solution = solution(2:end); % remove the first element
         optimal_ce = solution;
     else
         oracle_result = false;

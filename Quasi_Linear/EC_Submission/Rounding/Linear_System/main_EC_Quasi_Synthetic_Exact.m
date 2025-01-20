@@ -5,8 +5,8 @@ addpath('/Users/chjiang/Dropbox/EG_EXP/Quasi_Linear/EC_Submission/Efficiency');
 
 %%% ! Step 1: Basic setting of the problem
 %%% Todo: Consider the machine accuracy 
-n = 50;  % Number of rows
-m = 50;   % Number of columns
+n = 20;  % Number of rows
+m = 20;   % Number of columns
 B = ones(n, 1);  % Random B vector
 
 % Define the folder name
@@ -64,7 +64,7 @@ adaptive_plot_flag = false;  %%% ! Set it to false version
 plot_flag = false;
 plot_flag_smooth = false;
 adaptive = true;
-phase_num = 200;
+phase_num = 20;
 [solution_adaptive, total_time_adaptive, total_iter_adaptive, obj_values_adaptive, dis_adaptive, results_matrix] = quasi_dual_adaptive_exact(v, B, mu0, max_iter_adaptive, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, adaptive_plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive, phase_num);
 disp(['Adaptive AGD iterations: ', num2str(total_iter_adaptive)]);
 disp(['Adaptive AGD time: ', num2str(total_time_adaptive), ' seconds']);

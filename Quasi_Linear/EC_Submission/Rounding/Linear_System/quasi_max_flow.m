@@ -11,54 +11,61 @@ function [is_feasible, optimal_value, sum_exp_mu] = quasi_max_flow(mu, B, v, R)
     %   sum_exp_mu: Sum of exp(mu)
     % ! Already with updated input
     % Dimensions
-    m_plus_1 = length(mu); % m+1
-    n = length(B);
     % Step 1: Check if linear_activation(mu, v) is equal to R
-    if ~isequal(linear_activation(mu, v), R)
+    % ! This is for double check the machine accuracy
+    sum(sum(abs(quasi_activation(mu, v)-R)))
+    if ~isequal(quasi_activation(mu, v), R)
         is_feasible = false;
         optimal_value = inf;
         sum_exp_mu = inf;
         return;
     end
-    
+    mu = mu(2:end); % Remove the last element
+    % 假设 mu, R, B, m, n 已经定义
+
+    % 定义节点集合 V
     V = {'s', 't'};
-    for j = 0:m_plus_1-1
+    for j = 0:length(mu)  % 注意：j 从 0 开始
         V{end+1} = sprintf('g%d', j);
     end
-    for i = 1:n
+    for i = 1:length(B)
         V{end+1} = sprintf('b%d', i);
     end
 
-    % Define the edge set E and capacities
+    % 定义边集 E 和容量 C
     E = [];
     C = [];
 
-    % Edges from source 's' to g_j with capacity exp(mu_j)
-    for j = 0:m_plus_1-1
+    % 从源节点 's' 到 g_j 的边，容量为 exp(mu_j)（j > 0）
+    for j = 1:length(mu)  % 注意：j 从 1 开始，因为 j = 0 没有 mu_j
         E = [E; {'s', sprintf('g%d', j)}];
-        C = [C; exp(mu(j+1))]; % Adjust index for MATLAB (1-based)
+        C = [C; exp(mu(j))];
     end
 
-    % Edges from g_j to b_i with capacity +inf if R(i,j+1) == 1
-    for i = 1:n
-        for j = 0:m_plus_1-1
-            if R(i,j+1) == 1 % Adjust index for MATLAB (1-based)
+    % j = 0 不需要连接到 mu_j，因此直接从 's' 到 g0 的边容量为无穷大
+    E = [E; {'s', 'g0'}];
+    C = [C; inf];
+
+    % 从 g_j 到 b_i 的边，容量为 +inf 如果 R(i,j) == 1
+    for i = 1:length(B)
+        for j = 0:length(mu)  % 注意：j 从 0 开始
+            if j == 0 || R(i,j) == 1  % j = 0 时总是连接，j > 0 时根据 R(i,j) 决定
                 E = [E; {sprintf('g%d', j), sprintf('b%d', i)}];
                 C = [C; inf];
             end
         end
     end
 
-    % Edges from b_i to sink 't' with capacity B_i
-    for i = 1:n
+    % 从 b_i 到汇节点 't' 的边，容量为 B_i
+    for i = 1:length(B)
         E = [E; {sprintf('b%d', i), 't'}];
         C = [C; B(i)];
     end
 
-    % Create the graph
+    % 创建有向图
     G = digraph(E(:,1), E(:,2), C);
 
-    % Solve the max-flow problem
+    % 求解最大流问题
     mf = maxflow(G, 's', 't');
 
     optimal_value = mf;
@@ -68,7 +75,7 @@ function [is_feasible, optimal_value, sum_exp_mu] = quasi_max_flow(mu, B, v, R)
     is_feasible = abs(optimal_value - sum_exp_mu) < 1e-2;
 end
 
-function binary_matrix = linear_activation(mu, v)
+function binary_matrix = quasi_activation(mu, v)
     % linear_activation - Given a 1 x (m+1) vector mu and an n x (m+1) matrix v, output a binary matrix
     % where each element is 1 if it is the maximum of its row, and 0 otherwise.
     %
@@ -87,5 +94,5 @@ function binary_matrix = linear_activation(mu, v)
 
     % Create a binary matrix where each element is 1 if it is the maximum of its row
     % Use a numerical precision threshold of 1e-8
-    binary_matrix = abs(adjusted_values - max_values) < 1e-6; %%% Todo: Need to revise this
+    binary_matrix = abs(adjusted_values - max_values) < 1e-4; %%% Todo: Need to revise this
 end
