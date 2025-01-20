@@ -5,15 +5,15 @@ clc
 clear
 
 % Define problem parameters
-n = 500;  % Number of rows %%% Todo: Change the size
-m = 500;   % Number of columns
+n = 300;  % Number of rows %%% Todo: Change the size
+m = 300;   % Number of columns
 B = ones(n,1);
 
 % Define the folder name
 dataset_folder = 'synthetica_dataset';
 
 % Todo: change the epsilon threhold here
-max_iter = 11000;
+max_iter = 10000;
 max_iter_adaptive = 4500;
 epsilon = 1e-4; % Stopping criteria with epsilon %%% Todo: Change the threhold
 plot_flag = true;
@@ -79,7 +79,7 @@ disp(['Subgradient time: ', num2str(time_sub), ' seconds']);
 disp(['Subgradient iterations: ', num2str(iter_sub)]);
 
 %%% * - solve the problem by mirror descent
-eta = 0.2;
+eta = 1;
 [solution_md, time_md, iter_md, obj_values_md, distance_md] = linear_primal_md(v, B, x0, eta, epsilon, max_iter, plot_flag, p_opt_solver, fval_solver);
 disp(['MD iterations: ', num2str(iter_md)]);
 disp(['MD time: ', num2str(time_md), ' seconds']);
@@ -105,12 +105,12 @@ disp(['Adaptive AGD time: ', num2str(total_time_adaptive), ' seconds']);
 
 %%% * - plot the descent graph
 % Determine the smallest length among the three data sets
-min_length = min([length(obj_values_md), length(obj_values_sub), length(obj_values_adaptive)]);
+min_length =  length(obj_values_adaptive);
 
 % Truncate the data sets to the smallest length
-obj_values_md = obj_values_md(1:min_length);
-obj_values_sub = obj_values_sub(1:min_length);
-obj_values_adaptive = obj_values_adaptive(1:min_length);
+% obj_values_md = obj_values_md(1:max_iter);
+% obj_values_sub = obj_values_sub(1:max_iter);
+% obj_values_adaptive = obj_values_adaptive(1:min_length);
 
 % Create x-axis values
 x_md = 1:length(obj_values_md);

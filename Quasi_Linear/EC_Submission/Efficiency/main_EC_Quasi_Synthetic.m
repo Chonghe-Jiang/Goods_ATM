@@ -11,7 +11,7 @@ m = 500;   % Number of columns
 B = ones(n, 1);  % Random B vector
 
 % Todo: Change the threhold
-max_iter = 10000;
+max_iter = 12000;
 max_iter_adaptive = 4500;
 epsilon = 1e-4; 
 plot_flag = true;
@@ -65,7 +65,7 @@ sigma = min(exp(mu_lower));
 L = exp(max(mu_upper)) + (sum(B) / delta); 
 adaptive = false;
 step_size = 1e-5; %%% Todo: Subgradient stepsize
-eta = 0.2;  %%% Todo: MD stepsize
+eta = 1;  %%% Todo: MD stepsize - now is the optimal step size 1
 
 %%% * - ini of p0 and mu0
 p0 = quasi_init_gd(p_lower,p_upper,sum(B));
@@ -97,11 +97,6 @@ disp(['Adaptive AGD time: ', num2str(total_time_adaptive), ' seconds']);
 %%% * - plot the descent graph
 % Determine the smallest length among the three data sets
 min_length = min([length(obj_values_md), length(obj_values_sub), length(obj_values_adaptive)]);
-
-% Truncate the data sets to the smallest length
-obj_values_md = obj_values_md(1:min_length);
-obj_values_sub = obj_values_sub(1:min_length);
-obj_values_adaptive = obj_values_adaptive(1:min_length);
 
 % Create x-axis values
 x_md = 1:length(obj_values_md);

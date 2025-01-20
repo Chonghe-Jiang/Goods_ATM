@@ -9,9 +9,9 @@ v = readmatrix('Dataset/Ratings_kroer.csv') + 0.1;
 B = ones(n,1);
 
 % Set common parameters
-max_iter = 12000;
+max_iter = 14000;
 max_iter_adaptive = 4500;
-epsilon = 1e-3; % Stopping criteria with epsilon %%% Todo: Real-data precision
+epsilon = 1e-4; % Stopping criteria with epsilon %%% Todo: Real-data precision
 plot_flag = true;
 
 %%% * Box constraint  
@@ -26,7 +26,7 @@ sigma = min(exp(mu_lower));
 L = exp(max(mu_upper)) + (sum(B) / delta); 
 adaptive = false;
 step_size = 1e-4; % Todo: subgradient stepsize
-eta = 0.1;  %Todo: md stepsize
+eta = 0.5;  %Todo: md stepsize
 
 %%% * - ini of p0 and mu0
 p0 = quasi_init_gd(p_lower,p_upper,sum(B));
@@ -88,7 +88,7 @@ hold off;
 set(gca, 'FontSize', 15); % Set axis font size
 xlabel('Iteration', 'FontSize', 25); % X-axis label with larger font size
 ylabel('Objective Value Gap', 'FontSize', 25); % Y-axis label with larger font size
-title('Quasi-Linear + Low Precision', 'FontSize', 25); % Graph title with larger font size
+title('Quasi-Linear + High Precision', 'FontSize', 25); % Graph title with larger font size
 legend show; % Show legend
 grid on; % Enable grid
 

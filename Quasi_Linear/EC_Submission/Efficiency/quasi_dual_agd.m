@@ -84,7 +84,7 @@ function [solution, time, iter, obj_values, dis_agd, convergence] = quasi_dual_a
 
         % Update of mu and y
         %%% Todo: Be careful here, whether we use long step or not
-        mu_new = P(y - (8 / (L)) * grad_f); %%% Todo: previously 1/2L not 2/L - for synthetic data
+        mu_new = P(y - (100 / (L)) * grad_f); %%% Todo: previously 1/2L not 2/L - for synthetic data
         
         % Update y
         y_new = mu_new + ((1 - sqrt(q)) / (1 + sqrt(q))) * (mu_new - mu);
