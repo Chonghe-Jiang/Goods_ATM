@@ -1,5 +1,4 @@
-function [gap, gap_array, activation_matrix] = linear_compute_gap(v, B, mu, radius_current)
-    [n, m] = size(v);
+function gap = linear_optimal_gap(v, mu)
     matrix = log(v) - mu;
     top_value = max(matrix, [], 2);
     %%% ! Important step: machine accuracy
@@ -8,8 +7,4 @@ function [gap, gap_array, activation_matrix] = linear_compute_gap(v, B, mu, radi
     second_top_value = max(matrix, [], 2);
     gap_array = top_value - second_top_value;
     gap = min(gap_array);
-    delta_threshold = radius_current*2;
-    matrix = log(v) - mu;
-    activation_matrix = (matrix - top_value) >= -delta_threshold;
-    activation_matrix = sparse(activation_matrix);
 end

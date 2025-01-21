@@ -88,5 +88,5 @@ function binary_matrix = linear_activation(mu, v)
 
     % Create a binary matrix where each element is 1 if it is the maximum of its row
     % Use a numerical precision threshold of 1e-8
-    binary_matrix = abs(adjusted_values - max_values) < 1e-6; %%% Todo: Need to revise this
+    binary_matrix = abs(adjusted_values - max_values) < 1e-8; %%% Todo: Need to revise this
 end

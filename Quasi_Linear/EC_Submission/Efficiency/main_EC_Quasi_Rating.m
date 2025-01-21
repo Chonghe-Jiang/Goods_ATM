@@ -5,6 +5,7 @@ clc
 clear
 v = readmatrix('Dataset/Ratings_kroer.csv') + 0.1;
 % v = v/norm(v,"fro");
+v = floor(v)+1;
 [n,m] = size(v);
 B = ones(n,1);
 

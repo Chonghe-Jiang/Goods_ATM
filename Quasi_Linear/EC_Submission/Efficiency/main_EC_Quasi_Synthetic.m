@@ -6,12 +6,12 @@ clc
 clear
 
 % Define problem parameters
-n = 500;  % Number of rows 
-m = 500;   % Number of columns
+n = 50;  % Number of rows 
+m = 50;   % Number of columns
 B = ones(n, 1);  % Random B vector
 
 % Todo: Change the threhold
-max_iter = 20000;
+max_iter = 1300;
 max_iter_adaptive = 4500;
 epsilon = 1e-4; 
 plot_flag = true;

@@ -4,7 +4,8 @@
 clc
 clear
 v = readmatrix('Dataset/Ratings_kroer.csv') + 0.1;
-v = v/norm(v,"fro");
+% v = v/norm(v,"fro");
+v = floor(v)+1;
 [n,m] = size(v);
 B = ones(n,1);
 
@@ -88,6 +89,6 @@ hold off;
 set(gca, 'FontSize', 15); % Set axis font size
 xlabel('Iteration', 'FontSize', 25); % X-axis label with larger font size
 ylabel('Objective Value Gap', 'FontSize', 25); % Y-axis label with larger font size
-title('Linear + High Precision', 'FontSize', 25); % Graph title with larger font size
+title('Linear', 'FontSize', 25); % Graph title with larger font size
 legend show; % Show legend
 grid on; % Enable grid

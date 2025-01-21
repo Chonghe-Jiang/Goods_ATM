@@ -13,6 +13,7 @@ function [oracle_result, optimal_ce, optimal_value, sum_exp_mu] = linear_exact_o
 
     %%% ! Step 2: Generate the solution using linear_class_generation: two stages inside
     solution = linear_class_generation(activation_matrix, v, B);
+    solution
     % Step 3: Check feasibility using linear_max_flow
     [is_feasible, optimal_value, sum_exp_mu] = linear_max_flow(solution, B, v, activation_matrix);
     % Step 4: Return the appropriate results based on feasibility

@@ -5,17 +5,21 @@ addpath('/Users/chjiang/Dropbox/EG_EXP/Linear/EC_Submission/Efficiency');
 
 %%% ! Step 1: Basic setting of the problem
 %%% Todo: Consider the machine accuracy 
-n = 100;  % Number of rows
-m = 100;   % Number of columns
+n = 50;  % Number of rows
+m = 50;   % Number of columns
 B = ones(n, 1);  % Random B vector
 
+%%% Todo: Change the data type here
 % Define the folder name
-dataset_folder = 'exact_data';
+dataset_folder = 'exact_data_EC';
+% Define the CSV filename
+csv_filename = 'solver_adaptive_gap_integer.csv';
 
 % Generate the filename for solver results based on n and m
-solver_filename = sprintf('solver_exact_log_%d_%d.mat', n, m);
+%%% Todo: Change the file name here
+solver_filename = sprintf('solver_exact_integer_%d_%d.mat', n, m);
 solver_filepath = fullfile(dataset_folder, solver_filename); % Full path to the file
-v_filename = sprintf('v_exact_log_%d_%d.mat', n, m);
+v_filename = sprintf('v_exact_integer_%d_%d.mat', n, m);
 v_filepath = fullfile(dataset_folder, v_filename); % Full path to the file
 
 % Check if the file exists. If it does, load 'v' from the file. Otherwise, generate 'v' and save it.
@@ -23,11 +27,11 @@ if exist(v_filepath, 'file') == 2
     load(v_filepath, 'v');  % Load 'v' from the file
     disp(['Loaded v from ', v_filepath]);
 else
-    %v = rand(n, m); 
-    % v = exprnd(10, n, m); does not work
-    v = lognrnd(0, 10, n, m); % Draw valuations from log-normal distribution
-    % v = rand(n,m);
-    % v = v ./ sum(v, 2); 
+    %%% Todo: Change the data type here
+    % v = 10*rand(n, m); 
+    % v = exprnd(10, n, m); 
+    % v = lognrnd(0, 1, n, m);
+    v = randi([1,10],n,m);
     save(v_filepath, 'v');  % Save 'v' to a file for future use
     disp(['Generated v and saved to ', v_filepath]);
 end
@@ -38,7 +42,7 @@ p_lower = max(v .* B ./ sum(abs(v),2));
 p_upper = norm(B, 1) * ones(1, m);
 mu_lower = log(p_lower);
 mu_upper = log(p_upper);
-delta = 0.3;  % Todo: parameter setting of iterative algorithm
+delta = 0.1;  % Todo: parameter setting of iterative algorithm
 epsilon = 0.1; %%% ! Note that this epsilon has no usage actually
 sigma = min(exp(mu_lower));
 L = exp(max(mu_upper)) + (sum(B) / delta); 
@@ -63,9 +67,30 @@ adaptive_plot_flag = false;  %%% ! Set it to false version
 plot_flag = false;
 plot_flag_smooth = false;
 adaptive = true;
-phase_num = 200;
+phase_num = 1000;
+tic;
 [solution_adaptive, total_time_adaptive, total_iter_adaptive, obj_values_adaptive, dis_adaptive, results_matrix] = linear_dual_adaptive_exact(v, B, mu0, max_iter_adaptive, L, sigma, epsilon, mu_lower, mu_upper, delta, plot_flag, adaptive_plot_flag, plot_flag_smooth, p_opt_solver, fval_solver, adaptive, phase_num);
+adaptive_time = toc;
 disp(['Adaptive AGD iterations: ', num2str(total_iter_adaptive)]);
-disp(['Adaptive AGD time: ', num2str(total_time_adaptive), ' seconds']);
+disp(['Adaptive AGD time: ', num2str(adaptive_time), ' seconds']);
 Exact_solver_gap = norm(solution_adaptive - log(p_opt_solver));
 disp(['Solution Gap between Exact and Solver ', num2str(Exact_solver_gap)]);
+gap_optimal = linear_optimal_gap(v, solution_adaptive);
+disp(['The Gap is ', num2str(gap_optimal)]);
+%%% ! Step 3: Document n, m, solver_time, adaptive_time, and gap_optimal to a CSV file
+% Create a table with the data
+data_table = table(n, m, solve_time, adaptive_time, gap_optimal, ...
+    'VariableNames', {'n', 'm', 'solver_time', 'adaptive_time', 'gap_optimal'});
+
+
+
+% Check if the file exists. If it does, append the data. Otherwise, create a new file.
+if exist(csv_filename, 'file') == 2
+    % File exists, append the data
+    writetable(data_table, csv_filename, 'WriteMode', 'append');
+else
+    % File does not exist, create a new file with headers
+    writetable(data_table, csv_filename);
+end
+
+disp(['Data saved to ', csv_filename]);
