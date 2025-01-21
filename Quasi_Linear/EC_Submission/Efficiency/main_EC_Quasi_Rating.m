@@ -9,7 +9,7 @@ v = readmatrix('Dataset/Ratings_kroer.csv') + 0.1;
 B = ones(n,1);
 
 % Set common parameters
-max_iter = 14000;
+max_iter = 20000;
 max_iter_adaptive = 4500;
 epsilon = 1e-4; % Stopping criteria with epsilon %%% Todo: Real-data precision
 plot_flag = true;

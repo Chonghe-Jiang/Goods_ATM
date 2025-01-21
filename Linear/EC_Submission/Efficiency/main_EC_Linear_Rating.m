@@ -9,7 +9,7 @@ v = v/norm(v,"fro");
 B = ones(n,1);
 
 % Set common parameters
-max_iter = 12000;
+max_iter = 20000;
 max_iter_adaptive = 4500;
 epsilon = 1e-4; % Stopping criteria with epsilon %%% Todo: Real-data precision
 plot_flag = true;

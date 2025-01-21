@@ -5,23 +5,23 @@ clc
 clear
 
 % Define problem parameters
-n = 300;  % Number of rows %%% Todo: Change the size
-m = 300;   % Number of columns
+n = 500;  % Number of rows %%% Todo: Change the size
+m = 500;   % Number of columns
 B = ones(n,1);
 
 % Define the folder name
 dataset_folder = 'synthetica_dataset';
 
 % Todo: change the epsilon threhold here
-max_iter = 10000;
+max_iter = 20000;
 max_iter_adaptive = 4500;
 epsilon = 1e-4; % Stopping criteria with epsilon %%% Todo: Change the threhold
 plot_flag = true;
 
 % Generate the filename for solver results based on n and m
-solver_filename = sprintf('solver_linear_rand_%d_%d.mat', n, m);
+solver_filename = sprintf('solver_linear_exp_%d_%d.mat', n, m);
 solver_filepath = fullfile(dataset_folder, solver_filename); % Full path to the file
-v_filename = sprintf('v_linear_rand_%d_%d.mat', n, m);
+v_filename = sprintf('v_linear_exp_%d_%d.mat', n, m);
 v_filepath = fullfile(dataset_folder, v_filename); % Full path to the file
 
 % Check if the file exists. If it does, load 'v' from the file. Otherwise, generate 'v' and save it.
@@ -29,9 +29,9 @@ if exist(v_filepath, 'file') == 2
     load(v_filepath, 'v');  % Load 'v' from the file
     disp(['Loaded v from ', v_filepath]);
 else
-    v = rand(n,m);
+    % v = rand(n,m);
     % v = randi([1, 10], n, m); % Draw valuations from integer uniform distribution
-    % v = exprnd(10, n, m); 
+    v = exprnd(10, n, m); 
     % v = lognrnd(0, 10, n, m); % Draw valuations from log-normal distribution
     v = v ./ sum(v, 2); 
     save(v_filepath, 'v');  % Save 'v' to a file for future use

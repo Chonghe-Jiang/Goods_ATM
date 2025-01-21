@@ -11,7 +11,7 @@ m = 500;   % Number of columns
 B = ones(n, 1);  % Random B vector
 
 % Todo: Change the threhold
-max_iter = 12000;
+max_iter = 20000;
 max_iter_adaptive = 4500;
 epsilon = 1e-4; 
 plot_flag = true;
@@ -20,10 +20,10 @@ plot_flag = true;
 dataset_folder = 'synthetica_dataset_quasi';  % Changed folder name to include "quasi"
 % Generate the filename for v based on n and m
 %%% Todo: Remember to change the folder name if necessary
-v_filename = sprintf('v_quasi_rand_%d_%d.mat', n, m);  % Changed filename to include "quasi"
+v_filename = sprintf('v_quasi_exp_%d_%d.mat', n, m);  % Changed filename to include "quasi"
 v_filepath = fullfile(dataset_folder, v_filename); % Full path to the file
 % Generate the filename for solver results based on n and m
-solver_filename = sprintf('solver_quasi_rand_%d_%d.mat', n, m);  % Changed filename to include "quasi"
+solver_filename = sprintf('solver_quasi_exp_%d_%d.mat', n, m);  % Changed filename to include "quasi"
 solver_filepath = fullfile(dataset_folder, solver_filename); % Full path to the file
 
 % Check if the file exists. If it does, load 'v' from the file. Otherwise, generate 'v' and save it.
@@ -33,10 +33,9 @@ if exist(v_filepath, 'file') == 2
 else
     % v = 20*rand(n, m)+5; 
     % v = randi([1, 10], n, m); % Draw valuations from integer uniform distribution
-    % v = exprnd(10, n, m); 
+    v = exprnd(10, n, m); 
     % v = lognrnd(0, 10, n, m); % Draw valuations from log-normal distribution
-    % v = v ./ sum(v, 2); 
-    v = 20*rand(n, m)+5;
+    v = v ./ sum(v, 2); 
     save(v_filepath, 'v');  % Save 'v' to a file for future use
     disp(['Generated v and saved to ', v_filepath]);
 end
@@ -64,7 +63,7 @@ delta = 0.1;
 sigma = min(exp(mu_lower));
 L = exp(max(mu_upper)) + (sum(B) / delta); 
 adaptive = false;
-step_size = 1e-5; %%% Todo: Subgradient stepsize
+step_size = 1e-3; %%% Todo: Subgradient stepsize
 eta = 1;  %%% Todo: MD stepsize - now is the optimal step size 1
 
 %%% * - ini of p0 and mu0
