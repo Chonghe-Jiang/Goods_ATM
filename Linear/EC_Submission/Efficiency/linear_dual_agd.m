@@ -90,7 +90,7 @@ function [solution, time, iter, obj_values, dis_agd, convergence] = linear_dual_
             break;
         end
         %%% Todo: give a rigorous definition of the phase changing phenomena 
-        if adaptive && iter>=300 && abs(f_smooth_values(iter) - f_smooth_values(iter-1)) < 1e-3 &&  abs(f_smooth_values(iter-1) - f_smooth_values(iter-2)) < 1e-3 && abs(f_smooth_values(iter-2) - f_smooth_values(iter-3)) < 1e-3 &&  abs(f_smooth_values(iter-3) - f_smooth_values(iter-4)) < 1e-3
+        if adaptive && iter>=200 && abs(f_smooth_values(iter) - f_smooth_values(iter-1)) < 1e-3 &&  abs(f_smooth_values(iter-1) - f_smooth_values(iter-2)) < 1e-3 && abs(f_smooth_values(iter-2) - f_smooth_values(iter-3)) < 1e-3 &&  abs(f_smooth_values(iter-3) - f_smooth_values(iter-4)) < 1e-3
             break;
         end        
         % Update variables

@@ -5,8 +5,8 @@ clc
 clear
 
 % Define problem parameters
-n = 500;  % Number of rows
-m = 500;  % Number of columns
+n = 300;  % Number of rows
+m = 300;  % Number of columns
 B = ones(n, 1);
 
 % Define the folder name
@@ -59,7 +59,7 @@ delta = 0.1;
 sigma = min(exp(mu_lower));
 L = exp(max(mu_upper)) + (sum(B) / delta); 
 adaptive = false;
-step_size = 1e-3; %%% Todo: Subgradient stepsize
+step_size = 1e-4; %%% Todo: Subgradient stepsize
 
 %%% * - ini of p0 and mu0
 p0 = linear_init_gd(p_lower, p_upper, sum(B));
@@ -71,6 +71,12 @@ x0 = linear_init_md(p0, B);
 disp(['Subgradient time: ', num2str(time_sub), ' seconds']);
 disp(['Subgradient iterations: ', num2str(iter_sub)]);
 
+%%% * - solve the problem by adaptive subgradient
+switch_step_sub = 5000; % Number of iterations after which the step size decreases
+[solution_sub_adaptive, obj_values_sub_adaptive, dis_sub_adaptive, time_sub_adaptive, iter_sub_adaptive] = linear_dual_subgradient_adaptive(v, B, p0, max_iter, step_size, epsilon, plot_flag, p_opt_solver, fval_solver, switch_step_sub);
+disp(['Adaptive Subgradient time: ', num2str(time_sub_adaptive), ' seconds']);
+disp(['Adaptive Subgradient iterations: ', num2str(iter_sub_adaptive)]);
+
 %%% * - solve the problem by mirror descent
 eta = 1;
 [solution_md, time_md, iter_md, obj_values_md, distance_md] = linear_primal_md(v, B, x0, eta, epsilon, max_iter, plot_flag, p_opt_solver, fval_solver);
@@ -79,8 +85,8 @@ disp(['MD time: ', num2str(time_md), ' seconds']);
 
 %%% * - solve the problem by adaptive mirror descent
 eta = 1; % ! Actually no usage here
-switch_step = 2000;
-[solution_md_adaptive, time_md_adaptive, iter_md_adaptive, obj_values_md_adaptive, distance_md_adaptive] = linear_primal_md_adaptive(v, B, x0, epsilon, max_iter, plot_flag, p_opt_solver, fval_solver, switch_step);
+switch_step_md = 2000;
+[solution_md_adaptive, time_md_adaptive, iter_md_adaptive, obj_values_md_adaptive, distance_md_adaptive] = linear_primal_md_adaptive(v, B, x0, epsilon, max_iter, plot_flag, p_opt_solver, fval_solver, switch_step_md);
 disp(['Adaptive MD iterations: ', num2str(iter_md_adaptive)]);
 disp(['Adaptive MD time: ', num2str(time_md_adaptive), ' seconds']);
 
@@ -98,16 +104,18 @@ disp(['Adaptive AGD time: ', num2str(total_time_adaptive), ' seconds']);
 % Create x-axis values
 x_md = 1:length(obj_values_md);
 x_subgrad = 1:length(obj_values_sub);
+x_subgrad_adaptive = 1:length(obj_values_sub_adaptive);
 x_adaptive = 1:length(obj_values_adaptive);
 x_md_adaptive = 1:length(obj_values_md_adaptive);
 
 % Plotting
 figure;
-semilogy(x_md, abs(obj_values_md), '-d', 'DisplayName', 'Mirror Descent', 'LineWidth', 2); % Plot Mirror Descent
-hold on;
 semilogy(x_subgrad, abs(obj_values_sub), '-d', 'DisplayName', 'Tatonnement', 'LineWidth', 2); % Plot Subgradient
-semilogy(x_adaptive, abs(obj_values_adaptive), '-d', 'DisplayName', 'ATM', 'LineWidth', 2); % Plot Adaptive AGD
+hold on;
+semilogy(x_subgrad_adaptive, abs(obj_values_sub_adaptive), '-d', 'DisplayName', 'Adaptive Tatonnement', 'LineWidth', 2); % Plot Adaptive Subgradient
+semilogy(x_md, abs(obj_values_md), '-d', 'DisplayName', 'Mirror Descent', 'LineWidth', 2); % Plot Mirror Descent
 semilogy(x_md_adaptive, abs(obj_values_md_adaptive), '-d', 'DisplayName', 'Adaptive MD', 'LineWidth', 2); % Plot Adaptive MD
+semilogy(x_adaptive, abs(obj_values_adaptive), '-d', 'DisplayName', 'ATM', 'LineWidth', 2); % Plot Adaptive AGD
 hold off;
 
 % Set font sizes and other properties
@@ -115,17 +123,19 @@ set(gca, 'FontSize', 15); % Set axis font size
 xlabel('Iteration', 'FontSize', 25); % X-axis label with larger font size
 ylabel('Objective Value Gap', 'FontSize', 25); % Y-axis label with larger font size
 title(['n=', num2str(n), ', m=', num2str(m)], 'FontSize', 25); % Graph title with larger font size
-legend show; % Show legend
+legend('show', 'Location', 'best'); % Show legend and position it at the best location
 grid on; % Enable grid
 
 %%% * - Calculate distances to solver solution
 distance_md_to_solver = norm(solution_md - p_opt_solver); % Distance for Mirror Descent
 distance_sub_to_solver = norm(solution_sub - p_opt_solver); % Distance for Subgradient
+distance_sub_adaptive_to_solver = norm(solution_sub_adaptive - p_opt_solver); % Distance for Adaptive Subgradient
 distance_adaptive_to_solver = norm(exp(solution_adaptive) - p_opt_solver); % Distance for Adaptive AGD
 distance_md_adaptive_to_solver = norm(solution_md_adaptive - p_opt_solver); % Distance for Adaptive MD
 
 % Print the distances
 disp(['Distance between Mirror Descent solution and solver solution: ', num2str(distance_md_to_solver)]);
 disp(['Distance between Subgradient solution and solver solution: ', num2str(distance_sub_to_solver)]);
+disp(['Distance between Adaptive Subgradient solution and solver solution: ', num2str(distance_sub_adaptive_to_solver)]);
 disp(['Distance between Adaptive AGD solution and solver solution: ', num2str(distance_adaptive_to_solver)]);
 disp(['Distance between Adaptive MD solution and solver solution: ', num2str(distance_md_adaptive_to_solver)]);
