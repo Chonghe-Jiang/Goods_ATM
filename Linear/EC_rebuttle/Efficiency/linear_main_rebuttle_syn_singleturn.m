@@ -3,8 +3,17 @@
 %%% ! Optimal Version for Submission
 %%% ! Includes Direct GD, NAG, MD, DA, Subgradient comparison with selectable algorithms
 %%% ! Added integrated smoothed objective plot when plot_flag_smooth = true
+%%% ! Adjusted plotting format and extended plots to max iteration count
 clc
 clear
+
+% FOR DUAL AVERAGING, THE OPTIMAL PARAMETERS ARE:
+% We only consider the exp generation
+% 50*50 0.01
+% 100*100 0.005
+% 300*300 0.002
+
+% The only thing we need to do is the multiturn experiment
 
 % --- Algorithm Selection ---
 run_subgradient = false;      % Set to true to run Subgradient (Tatonnement)
@@ -29,15 +38,16 @@ max_iter_da = 20000;  % Max iterations for Dual Averaging % <-- ADDED
 max_iter_gd = 20000;  % Max iterations for Vanilla GD
 max_iter_agd = 20000; % Max iterations for NAG (adjust as needed)
 epsilon = 1e-1; % Stopping criteria based on original objective gap
-delta = 0.01; % Smoothing parameter (used by GD and NAG)
+delta = 0.01; % Smoothing parameter (used by GD and NAG) % <-- Adjusted based on comment
+eta_da = 0.5;  % Dual Averaging stepsize (needs tuning, might differ from eta_md) % <-- Adjusted based on comment
 plot_flag = false; % Set to true to see individual algorithm plots (Original Gap, Smooth Value, Distance)
 plot_flag_smooth = true; % Set to true to see separate plot for smoothed objective value comparison (for GD and NAG)
 % adaptive_plot_flag is not used in this version
 
 % Generate the filename for solver results based on n and m
-solver_filename = sprintf('solver_linear_exp_%d_%d.mat', n, m);
+solver_filename = sprintf('solver_linear_rand_%d_%d.mat', n, m);
 solver_filepath = fullfile(dataset_folder, solver_filename); % Full path to the file
-v_filename = sprintf('v_linear_exp_%d_%d.mat', n, m);
+v_filename = sprintf('v_linear_rand_%d_%d.mat', n, m);
 v_filepath = fullfile(dataset_folder, v_filename); % Full path to the file
 
 % Check if the file exists. If it does, load 'v' from the file. Otherwise, generate 'v' and save it.
@@ -82,7 +92,6 @@ mu_upper = log(p_upper);
 L_smooth = exp(max(mu_upper)) + (sum(B) / delta); % Lipschitz constant for smoothed gradient
 step_size_sub = 1e-3; % Subgradient stepsize (needs tuning)
 eta_md = 1;  % Mirror Descent stepsize (needs tuning)
-eta_da = 0.50;  % Dual Averaging stepsize (needs tuning, might differ from eta_md) % <-- ADDED
 step_size_gd = 1 / L_smooth; % Step size for Vanilla GD (can be tuned)
 % Handle cases where sigma might be zero or negative
 sigma_calc = min(exp(mu_lower));
@@ -110,6 +119,7 @@ x0 = linear_init_md(p0,B); % Initial x for primal methods (MD, DA)
 disp('--- Running Selected Algorithms ---');
 
 results = struct(); % Structure to store results of run algorithms
+algo_iterations = []; % Store actual iterations for each run algorithm
 
 %%% * - solve the problem by subgradient (Tatonnement) - Operates on Original Objective
 if run_subgradient
@@ -122,6 +132,7 @@ if run_subgradient
         results.subgradient.time = time_sub;
         results.subgradient.iter = iter_sub;
         results.subgradient.distance_final = norm(exp(solution_sub) - p_opt_solver); % Subgradient works on dual (mu), so exp() needed
+        algo_iterations = [algo_iterations, iter_sub]; % Store iteration count
     else
         warning('linear_dual_subgradient.m not found. Skipping Subgradient.');
         run_subgradient = false; % Disable plotting/reporting for this algorithm
@@ -139,6 +150,7 @@ if run_mirror_descent
         results.md.time = time_md;
         results.md.iter = iter_md;
         results.md.distance_final = norm(solution_md - p_opt_solver); % MD solution is primal p
+        algo_iterations = [algo_iterations, iter_md]; % Store iteration count
      else
         warning('linear_primal_md.m not found. Skipping Mirror Descent.');
         run_mirror_descent = false;
@@ -157,6 +169,7 @@ if run_dual_averaging
         results.da.time = time_da;
         results.da.iter = iter_da;
         results.da.distance_final = norm(solution_da - p_opt_solver); % DA solution is primal p
+        algo_iterations = [algo_iterations, iter_da]; % Store iteration count
      else
         warning('linear_primal_da.m not found. Skipping Dual Averaging.');
         run_dual_averaging = false;
@@ -178,6 +191,7 @@ if run_gd
         results.gd.time = time_gd;
         results.gd.iter = iter_gd;
         results.gd.distance_final = norm(exp(solution_gd) - p_opt_solver); % GD solution is dual mu
+        algo_iterations = [algo_iterations, iter_gd]; % Store iteration count
     else
         warning('linear_dual_gd.m not found. Skipping Vanilla GD.');
         run_gd = false;
@@ -199,6 +213,7 @@ if run_agd % Keep variable name run_agd for simplicity, but logic refers to NAG 
         results.agd.time = time_agd;
         results.agd.iter = iter_agd;
         results.agd.distance_final = norm(exp(solution_agd) - p_opt_solver); % NAG solution is dual mu
+        algo_iterations = [algo_iterations, iter_agd]; % Store iteration count
      else
         warning('linear_dual_agd.m not found or not modified to return smoothed values. Skipping NAG.');
         run_agd = false;
@@ -207,61 +222,92 @@ end
 
 disp('--- Algorithm Execution Finished ---');
 
+% --- Find maximum common iteration count for plotting --- START REVISION
+max_common_iter = 0; % Initialize with zero
+if ~isempty(algo_iterations)
+    max_common_iter = max(algo_iterations);
+    % Ensure at least 1 iteration for plotting if any algorithm ran
+    max_common_iter = max(1, max_common_iter);
+    fprintf('Plotting results up to iteration: %d\n', max_common_iter);
+else
+    max_common_iter = 0; % No algorithms ran
+end
+% --- Find maximum common iteration count for plotting --- END REVISION
+
 %%% * - plot the combined descent graph (Using Original Objective Gap for comparison)
-if run_subgradient || run_mirror_descent || run_dual_averaging || run_gd || run_agd % Only plot if at least one algorithm ran % <-- ADDED run_dual_averaging
+if max_common_iter > 0 % Only plot if at least one algorithm ran successfully
     disp('Plotting Objective Gap results...');
     figure; % Create figure for comparison plot
     hold on;
     legend_entries = {}; % Cell array to store legend entries dynamically
+    plot_handles = [];   % Store plot handles for legend customization
     all_obj_values_to_plot = []; % Collect objective values for ylim calculation
 
+    % Define common plot range for x-axis
+    plot_range_full = 1:max_common_iter;
+
     if run_mirror_descent && isfield(results, 'md') && ~isempty(results.md.obj_values)
-        semilogy(1:length(results.md.obj_values), abs(results.md.obj_values), '-o', 'DisplayName', 'Mirror Descent (Primal Gap)', 'LineWidth', 1.5, 'MarkerSize', 4); % Updated label
+        iters_actual = results.md.iter; % Get actual iterations for this algo
+        plot_range_algo = 1:iters_actual;
+        h = semilogy(plot_range_algo, abs(results.md.obj_values(plot_range_algo)), '-o', 'DisplayName', 'Mirror Descent (Primal Gap)', 'LineWidth', 2, 'MarkerSize', 4);
+        plot_handles(end+1) = h;
         legend_entries{end+1} = 'Mirror Descent (Primal Gap)';
-        all_obj_values_to_plot = [all_obj_values_to_plot; abs(results.md.obj_values(:))];
+        all_obj_values_to_plot = [all_obj_values_to_plot; abs(results.md.obj_values(:))]; % Collect all for ylim
     end
 
-    if run_dual_averaging && isfield(results, 'da') && ~isempty(results.da.obj_values) % <-- ADDED DA PLOTTING
-        semilogy(1:length(results.da.obj_values), abs(results.da.obj_values), '-*', 'DisplayName', 'Dual Averaging (Primal Gap)', 'LineWidth', 1.5, 'MarkerSize', 4);
-        legend_entries{end+1} = 'Dual Averaging (Primal Gap)';
-        all_obj_values_to_plot = [all_obj_values_to_plot; abs(results.da.obj_values(:))];
+    if run_dual_averaging && isfield(results, 'da') && ~isempty(results.da.obj_values)
+        iters_actual = results.da.iter;
+        plot_range_algo = 1:iters_actual;
+        h = semilogy(plot_range_algo, abs(results.da.obj_values(plot_range_algo)), '-*', 'DisplayName', 'Dual Averaging (Primal Gap)', 'LineWidth', 2, 'MarkerSize', 4);
+        plot_handles(end+1) = h;
+        legend_entries{end+1} = 'Dual Averaging';
+        all_obj_values_to_plot = [all_obj_values_to_plot; abs(results.da.obj_values(:))]; % Collect all for ylim
     end
 
     if run_subgradient && isfield(results, 'subgradient') && ~isempty(results.subgradient.obj_values)
-        semilogy(1:length(results.subgradient.obj_values), abs(results.subgradient.obj_values), '-s', 'DisplayName', 'Tatonnement (Dual Gap)', 'LineWidth', 1.5, 'MarkerSize', 4); % Updated label
-        legend_entries{end+1} = 'Tatonnement (Dual Gap)';
-        all_obj_values_to_plot = [all_obj_values_to_plot; abs(results.subgradient.obj_values(:))];
+        iters_actual = results.subgradient.iter;
+        plot_range_algo = 1:iters_actual;
+        h = semilogy(plot_range_algo, abs(results.subgradient.obj_values(plot_range_algo)), '-s', 'DisplayName', 'Tatonnement (Dual Gap)', 'LineWidth', 2, 'MarkerSize', 4);
+        plot_handles(end+1) = h;
+        legend_entries{end+1} = 'Tatonnement ';
+        all_obj_values_to_plot = [all_obj_values_to_plot; abs(results.subgradient.obj_values(:))]; % Collect all for ylim
     end
 
     if run_gd && isfield(results, 'gd') && ~isempty(results.gd.obj_values)
-        semilogy(1:length(results.gd.obj_values), abs(results.gd.obj_values), '-^', 'DisplayName', 'Vanilla GD (Dual Gap)', 'LineWidth', 1.5, 'MarkerSize', 4); % Updated label
-        legend_entries{end+1} = 'Vanilla GD (Dual Gap)';
-        all_obj_values_to_plot = [all_obj_values_to_plot; abs(results.gd.obj_values(:))];
+        iters_actual = results.gd.iter;
+        plot_range_algo = 1:iters_actual;
+        h = semilogy(plot_range_algo, abs(results.gd.obj_values(plot_range_algo)), '-^', 'DisplayName', 'Vanilla GD (Dual Gap)', 'LineWidth', 2, 'MarkerSize', 4);
+        plot_handles(end+1) = h;
+        legend_entries{end+1} = 'Vanilla GD ';
+        all_obj_values_to_plot = [all_obj_values_to_plot; abs(results.gd.obj_values(:))]; % Collect all for ylim
     end
 
     if run_agd && isfield(results, 'agd') && ~isempty(results.agd.obj_values)
-        semilogy(1:length(results.agd.obj_values), abs(results.agd.obj_values), '-d', 'DisplayName', 'NAG (Dual Gap)', 'LineWidth', 1.5, 'MarkerSize', 4); % Updated label
-        legend_entries{end+1} = 'NAG (Dual Gap)';
-        all_obj_values_to_plot = [all_obj_values_to_plot; abs(results.agd.obj_values(:))];
+        iters_actual = results.agd.iter;
+        plot_range_algo = 1:iters_actual;
+        h = semilogy(plot_range_algo, abs(results.agd.obj_values(plot_range_algo)), '-d', 'DisplayName', 'NAG (Dual Gap)', 'LineWidth', 2, 'MarkerSize', 4);
+        plot_handles(end+1) = h;
+        legend_entries{end+1} = 'NAG';
+        all_obj_values_to_plot = [all_obj_values_to_plot; abs(results.agd.obj_values(:))]; % Collect all for ylim
     end
 
     hold off;
 
-    % Customize plot
-    set(gca, 'FontSize', 12);
-    xlabel('Iteration', 'FontSize', 14);
-    % Requirement 4: Remove "Absolute" from Y-axis label
-    ylabel('Original Objective Value Gap |F(\cdot) - F*|', 'FontSize', 14); % Capital F, added absolute value bars
-    % Requirement 5: Remove delta from title
+    % Customize plot (Matching main_EC_Linear_Synthetic.m style)
+    set(gca, 'FontSize', 15); % Axis font size
+    xlabel('Iteration', 'FontSize', 20); % X-axis label font size
+    ylabel('Objective Value Gap F(\cdot) - F*', 'FontSize', 20); % Y-axis label font size
     title_str_obj = sprintf('Objective Gap Comparison (n=%d, m=%d)', n, m);
-    title(title_str_obj, 'FontSize', 16);
+    title(title_str_obj, 'FontSize', 25); % Title font size
     if ~isempty(legend_entries)
-        legend(legend_entries, 'Location', 'best'); % Show legend only for plotted algorithms
+        lgd = legend(plot_handles, legend_entries, 'Location', 'best'); % Create legend with handles
+        lgd.FontSize = 15; % Set legend font size
     else
         warning('No algorithms produced results for objective gap plotting.');
     end
     grid on;
     set(gca, 'YScale', 'log');
+    xlim([1, max_common_iter]); % Set x-axis limit to max iterations
 
     % Adjust y-axis limits dynamically based on plotted data
     valid_obj_values = all_obj_values_to_plot(all_obj_values_to_plot > 0 & isfinite(all_obj_values_to_plot)); % Exclude zero/NaN/Inf
@@ -284,8 +330,7 @@ else
 end
 
 %%% * -- Plot the integrated smoothed objective function graph -- %%%
-% No changes needed here as DA does not use the smoothed objective
-if plot_flag_smooth && run_gd && run_agd % Check if flag is true AND both GD and NAG ran
+if plot_flag_smooth && run_gd && run_agd && max_common_iter > 0 % Check if flag is true, both ran, and common iter exists
     % Check if smoothed results are available for both
     if isfield(results, 'gd') && isfield(results.gd, 'f_smooth_values') && ~isempty(results.gd.f_smooth_values) && ...
        isfield(results, 'agd') && isfield(results.agd, 'f_smooth_values') && ~isempty(results.agd.f_smooth_values)
@@ -293,25 +338,32 @@ if plot_flag_smooth && run_gd && run_agd % Check if flag is true AND both GD and
         disp('Plotting Smoothed Objective Function Comparison...');
         figure; % Create a new figure specifically for this plot
         hold on;
+        plot_handles_smooth = []; % Handles for smooth plot legend
 
         % Plot GD Smoothed Values
-        plot(1:length(results.gd.f_smooth_values), results.gd.f_smooth_values, '-^', 'DisplayName', 'Vanilla GD', 'LineWidth', 1.5, 'MarkerSize', 4);
+        iters_gd = results.gd.iter;
+        plot_range_gd = 1:iters_gd;
+        h = plot(plot_range_gd, results.gd.f_smooth_values(plot_range_gd), '-^', 'DisplayName', 'Vanilla GD', 'LineWidth', 2, 'MarkerSize', 4);
+        plot_handles_smooth(end+1) = h;
 
         % Plot NAG Smoothed Values
-        plot(1:length(results.agd.f_smooth_values), results.agd.f_smooth_values, '-d', 'DisplayName', 'NAG', 'LineWidth', 1.5, 'MarkerSize', 4); % Changed DisplayName
+        iters_agd = results.agd.iter;
+        plot_range_agd = 1:iters_agd;
+        h = plot(plot_range_agd, results.agd.f_smooth_values(plot_range_agd), '-d', 'DisplayName', 'NAG', 'LineWidth', 2, 'MarkerSize', 4);
+        plot_handles_smooth(end+1) = h;
 
         hold off;
 
-        % Customize plot
-        set(gca, 'FontSize', 12);
-        xlabel('Iteration', 'FontSize', 14);
-        % Requirement 2: Capital F in Y-axis label
-        ylabel('Smoothed Objective Value F_{\delta}(\mu)', 'FontSize', 14);
-        % Requirement 1 & 5: New Title without delta
+        % Customize plot (Matching main_EC_Linear_Synthetic.m style)
+        set(gca, 'FontSize', 15); % Axis font size
+        xlabel('Iteration', 'FontSize', 25); % X-axis label font size
+        ylabel('Smoothed Objective Value F_{\delta}(\mu)', 'FontSize', 25); % Y-axis label font size
         title_str_smooth = sprintf('Comparison on Problem (P_{\\delta}) (n=%d, m=%d)', n, m);
-        title(title_str_smooth, 'FontSize', 16);
-        legend('Location', 'best');
+        title(title_str_smooth, 'FontSize', 25); % Title font size
+        lgd_smooth = legend(plot_handles_smooth, 'Location', 'best'); % Use handles
+        lgd_smooth.FontSize = 15; % Set legend font size
         grid on;
+        xlim([1, max_common_iter]); % Set x-axis limit to max iterations
         % Optional: Adjust Y-axis limits if needed
         % all_smooth_vals = [results.gd.f_smooth_values(:); results.agd.f_smooth_values(:)];
         % ylim([min(all_smooth_vals)*0.99, max(all_smooth_vals)*1.01]);
@@ -320,7 +372,7 @@ if plot_flag_smooth && run_gd && run_agd % Check if flag is true AND both GD and
         warning('plot_flag_smooth is true, but smoothed objective results for both GD and NAG are not available. Skipping plot.');
     end
 elseif plot_flag_smooth
-    disp('plot_flag_smooth is true, but both GD and NAG were not selected or did not run successfully. Skipping smoothed objective plot.');
+    disp('plot_flag_smooth is true, but both GD and NAG were not selected or did not run successfully, or no common iterations found. Skipping smoothed objective plot.');
 end
 
 
@@ -358,4 +410,3 @@ if ~found_results % Check if any results were printed
 end
 
 disp('--- Script Finished ---');
-
