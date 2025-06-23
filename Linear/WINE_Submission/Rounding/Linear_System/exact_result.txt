@@ -1,0 +1,20 @@
+randi[1,10]
+50 * 50
+Adaptive AGD iterations: 2463
+Solution Gap between Exact and Solver 0.00025662
+
+100*100
+Adaptive AGD iterations: 2925
+Solution Gap between Exact and Solver 0.00068229
+
+200*200
+Adaptive AGD iterations: 3361
+Solution Gap between Exact and Solver 0.0016088
+
+300*300
+Adaptive AGD iterations: 3296
+Solution Gap between Exact and Solver 0.0026526
+
+400*400
+Adaptive AGD iterations: 9858
+Solution Gap between Exact and Solver 0.0077425

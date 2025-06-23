@@ -1,0 +1,4 @@
+1. Output the gap for various data types
+2. Run the experiment based on ATM,SGR and MD; Check the procudure
+several points: Compute activation matrix -> output mu -> max-flow Check
+several todo list: numerical issues in computing activation/max-flow part
