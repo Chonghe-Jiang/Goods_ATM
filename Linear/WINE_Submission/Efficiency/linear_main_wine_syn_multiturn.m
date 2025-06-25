@@ -13,7 +13,7 @@ clear
 % The only thing we need to do is the multiturn experiment
 
 % --- Algorithm Selection ---
-run_adaptive_nag = true;  % Set to true to run Adaptive NAG (using linear_dual_adaptive)
+run_adaptive_nag = true;  % Set to true to run APM
 run_adaptive_sub = true; % Set to true to run Adaptive Tatonnement (was Adaptive Subgradient)
 run_adaptive_md = true;  % Set to true to run Adaptive Mirror Descent
 run_primal_dual_pdhg = true; % Set to true to run PDHG (was Primal Dual PDHG)
@@ -25,8 +25,8 @@ run_adaptive_gd = false;   % Set to true to run Adaptive Vanilla GD
 % --------------------------
 
 % Define problem parameters
-n = 50;  % Number of rows
-m = 50;   % Number of columns
+n = 1500;  % Number of rows
+m = 1500;   % Number of columns
 B = ones(n,1); % For linear utilities, B_i = 1 is CEEI (w_i in PDHG paper)
 
 % Define the folder name
@@ -64,11 +64,12 @@ step_size_sub = 1e-3; % Corrected: Step size parameter for Tatonnement
 
 % PDHG Specific Parameters (Copied from linear_main_wine_syn_singleturn.m)
 % Todo: check this for the boosting performance
+% Todo: do not let it be too large, otherwise it will be too slow
 % ! Still require tuning
-max_outer_iter_pdhg = 600; % Number of outer loop restarts for PDHG
-K_inner_iter_pdhg = 500; % Inner iterations per outer loop for PDHG
-sigma_pdhg = 5/(2*sqrt(n)); % Example initial value, requires tuning
-tau_pdhg = 4/(2*sqrt(n)); % Example initial value, requires tuning
+max_outer_iter_pdhg = 100; % Number of outer loop restarts for PDHG
+K_inner_iter_pdhg = 200; % Inner iterations per outer loop for PDHG
+sigma_pdhg = 10/(2*sqrt(n)); % Example initial value, requires tuning
+tau_pdhg = 2/(2*sqrt(n)); % Example initial value, requires tuning
 
 
 % Plotting Flags (Control plotting *within* the called functions, if implemented)
@@ -370,7 +371,7 @@ if run_adaptive_gd || run_adaptive_nag || run_adaptive_sub || run_adaptive_md ||
         plot_range_algo = 1:(total_iters - 1); % Apply -1 here
         if ~isempty(plot_range_algo) && total_iters > 0
             h = semilogy(plot_range_algo, abs(results.adaptive_nag.obj_values(plot_range_algo)), '-d', 'DisplayName', 'Adaptive NAG', 'LineWidth', 2, 'MarkerSize', 4);
-            legend_entries{end+1} = 'Adaptive NAG';
+            legend_entries{end+1} = 'APM';
             all_obj_values_to_plot = [all_obj_values_to_plot; abs(results.adaptive_nag.obj_values(:))];
         end
     end
@@ -392,7 +393,7 @@ if run_adaptive_gd || run_adaptive_nag || run_adaptive_sub || run_adaptive_md ||
         plot_range_algo = 1:(total_iters - 1); % Apply -1 here
         if ~isempty(plot_range_algo) && total_iters > 0
             h = semilogy(plot_range_algo, abs(results.adaptive_md.obj_values(plot_range_algo)), '-o', 'DisplayName', 'Adaptive Mirror Descent', 'LineWidth', 2, 'MarkerSize', 4);
-            legend_entries{end+1} = 'Adaptive Mirror Descent';
+            legend_entries{end+1} = 'Adaptive MD';
             all_obj_values_to_plot = [all_obj_values_to_plot; abs(results.adaptive_md.obj_values(:))];
         end
     end
@@ -446,16 +447,16 @@ if run_adaptive_gd || run_adaptive_nag || run_adaptive_sub || run_adaptive_md ||
     % Customize plot (Matching singleturn style)
     set(gca, 'FontSize', 15); % Axis font size
     xlabel('Iteration', 'FontSize', 20); % X-axis label font size
-    ylabel('Objective Value Gap F(\cdot) - F*', 'FontSize', 20); % Y-axis label font size
+    ylabel('Objective Value Gap', 'FontSize', 20); % Y-axis label font size
     title_str_obj = sprintf('n=%d, m=%d', n, m);
     title(title_str_obj, 'FontSize', 25); % Title font size
     if ~isempty(legend_entries)
-        legend(legend_entries, 'Location', 'best', 'FontSize', 15); % Legend font size
+        legend(legend_entries, 'Location', 'northeast', 'FontSize', 10); %Todo: used to be best+15
     else
         warning('No algorithms produced results for objective gap plotting.');
     end
     grid on;
-    set(gca, 'YScale', 'log');
+    set(gca, 'YScale', 'log','LineWidth', 2); %Todo: check the revision here
     % Determine dynamic x-axis limit
     max_plot_iters = 0;
     if run_adaptive_gd && isfield(results, 'adaptive_gd'), max_plot_iters = max(max_plot_iters, results.adaptive_gd.iter - 1); end

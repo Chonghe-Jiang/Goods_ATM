@@ -134,7 +134,7 @@ function [solution, time, iter, obj_values, f_smooth_values_agd, dis_agd, conver
         % grad_norms(iter) = norm(grad_f);
 
         % Update of mu and y
-        step = 16 / L; % Step size based on L
+        step = 100 / L; % Step size based on L
         mu_new = P(y - step * grad_f);
 
         % Update y (Momentum step)
@@ -149,7 +149,7 @@ function [solution, time, iter, obj_values, f_smooth_values_agd, dis_agd, conver
         end
 
         % 2. Adaptive Phase Termination Check (Smoothed Objective Plateau)
-        if adaptive && iter >= 50 % Requires iter >= 200
+        if adaptive && iter >= 300 % Requires iter >= 200
             if abs(f_smooth_values(iter) - f_smooth_values(iter-1)) < 1e-3 && ...
                abs(f_smooth_values(iter-1) - f_smooth_values(iter-2)) < 1e-3 && ...
                abs(f_smooth_values(iter-2) - f_smooth_values(iter-3)) < 1e-3 && ...

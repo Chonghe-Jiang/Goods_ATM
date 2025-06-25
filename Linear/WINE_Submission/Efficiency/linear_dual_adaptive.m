@@ -87,7 +87,7 @@ function [solution_adaptive, total_time_adaptive, total_iter_adaptive, obj_adapt
         if phase < phase_num
             % Update delta and L using the defined strategy
             if phase >=1 && phase <=3
-                delta_current = delta_current / 3;
+                delta_current = delta_current / 5;
             elseif phase <= 5
                 delta_current = delta_current / 3; % Original code had this twice
             else
