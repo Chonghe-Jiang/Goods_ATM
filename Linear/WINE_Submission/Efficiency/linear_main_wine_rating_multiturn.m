@@ -16,8 +16,8 @@ clear
 run_adaptive_nag = false;  % Set to true to run APM
 run_adaptive_sub = false; % Set to true to run Adaptive Tatonnement (was Adaptive Subgradient)
 run_adaptive_md = false;  % Set to true to run Adaptive Mirror Descent
-run_primal_dual_pdhg = false; % Set to true to run PDHG (was Primal Dual PDHG)
-run_primal_md = true; % New: Set to true to run Mirror Descent (was Primal MD)
+run_primal_dual_pdhg = true; % Set to true to run PDHG (was Primal Dual PDHG)
+run_primal_md = false; % New: Set to true to run Mirror Descent (was Primal MD)
 run_subgradient = false; % New: Set to true to run Tatonnement (was Dual Subgradient)
 run_dual_averaging = false; % Set to true to run Dual Averaging (non-adaptive version)
 run_adaptive_gd = false;   % Set to true to run Adaptive Vanilla GD
@@ -67,10 +67,10 @@ step_size_sub = 1e-3; % Corrected: Step size parameter for Tatonnement
 % Todo: check this for the boosting performance
 % Todo: do not let it be too large, otherwise it will be too slow
 % ! Still require tuning
-max_outer_iter_pdhg = 100; % Number of outer loop restarts for PDHG
-K_inner_iter_pdhg = 200; % Inner iterations per outer loop for PDHG
-sigma_pdhg = 10/(2*sqrt(n)); % Example initial value, requires tuning
-tau_pdhg = 2/(2*sqrt(n)); % Example initial value, requires tuning
+max_outer_iter_pdhg = 1000; % Number of outer loop restarts for PDHG
+K_inner_iter_pdhg = 50; % Inner iterations per outer loop for PDHG
+sigma_pdhg = 0.01/(2*sqrt(n)); % Example initial value, requires tuning
+tau_pdhg = 0.01/(2*sqrt(n)); % Example initial value, requires tuning
 
 
 % Plotting Flags (Control plotting *within* the called functions, if implemented)
