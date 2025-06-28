@@ -12,21 +12,18 @@ run_adaptive_nag = true;
 run_adaptive_sub = true;
 run_adaptive_md = true;
 run_primal_dual_pdhg_fixed = false; % Set to true to run the original FIXED step-size PDHG
-run_primal_dual_pdhg_adaptive = true; % Set to true to run the NEW ADAPTIVE step-size PDHG
+run_primal_dual_pdhg_adaptive = false; % Set to true to run the NEW ADAPTIVE step-size PDHG
 run_primal_md = true;
 run_subgradient = true;
-run_dual_averaging = false;
+run_dual_averaging = true;
 run_adaptive_gd = false;
 
-% --------------------------
-
-% Define problem parameters
-n = 1000;  % Number of rows (buyers)
-m = 1000;   % Number of columns (goods)
-B = ones(n,1); % Budget vector (w_i in PDHG paper)
-
-% Define the folder name for caching data
-dataset_folder = 'synthetica_dataset';
+% --- Load the new dataset ---
+v = readmatrix('Dataset/Ratings_kroer.csv') + 0.1;
+v = floor(v) + 1; % Preprocess the data
+[n, m] = size(v);
+B = ones(n, 1); % Unit budget
+disp(['Loaded new dataset: Ratings_kroer.csv with n=', num2str(n), ', m=', num2str(m)]);
 
 % --- Iteration and Tolerance Parameters ---
 % General
@@ -54,7 +51,7 @@ max_iter_adaptive_md = 20000;
 switch_step_sub = 5000;
 switch_step_md = 5000;
 max_iter_da = 20000;
-eta_da = 0.01;
+eta_da = 0.3;
 max_iter_md = 20000;
 eta_md = 0.1;
 max_iter_sub = 20000;
@@ -67,41 +64,14 @@ plot_overall_adaptive = false; % Master plot flag for individual algorithm plots
 % --- End Parameters ---
 
 % --- Data Loading/Generation ---
-solver_filename = sprintf('solver_linear_rand_%d_%d.mat', n, m);
-solver_filepath = fullfile(dataset_folder, solver_filename);
-v_filename = sprintf('v_linear_rand_%d_%d.mat', n, m);
-v_filepath = fullfile(dataset_folder, v_filename);
 
-if ~isfolder(dataset_folder), mkdir(dataset_folder); end
-
-if exist(v_filepath, 'file') == 2
-    load(v_filepath, 'v');
-    disp(['Loaded v from ', v_filepath]);
-else
-    v = exprnd(10, n, m);
-    if any(sum(v, 2) == 0), v(sum(v, 2) == 0, :) = exprnd(10, sum(sum(v, 2) == 0), m); end
-    if any(sum(v, 1) == 0), v(:, sum(v, 1) == 0) = exprnd(10, n, sum(sum(v, 1) == 0)); end
-    v = v ./ sum(v, 2);
-    save(v_filepath, 'v');
-    disp(['Generated v and saved to ', v_filepath]);
-end
-
-if exist(solver_filepath, 'file') == 2
-    load(solver_filepath, 'p_opt_solver', 'beta_opt', 'fval_solver', 'solve_time');
-    disp(['Loaded solver results from ', solver_filepath]);
-else
-    if exist('linear_dual_solver', 'file') == 2
-        [p_opt_solver, beta_opt, fval_solver, solve_time] = linear_dual_solver(n, m, B, v);
-        save(solver_filepath, 'p_opt_solver', 'beta_opt', 'fval_solver', 'solve_time');
-        disp(['Solved and saved solver results to ', solver_filepath]);
-    else
-        p_opt_solver = zeros(1, m); fval_solver = 0; solve_time = 0; beta_opt = 0;
-        warning('linear_dual_solver.m not found. Using placeholder for optimal solution.');
-    end
-end
+load('/Users/chjiang/Dropbox/EG_EXP/Linear/WINE_Submission/Efficiency/Solver_Rating.mat', 'p_opt_solver', 'beta_opt', 'fval_solver', 'solve_time');
+disp(['Loaded solver results from /Users/chjiang/Dropbox/EG_EXP/Linear/EC_Submission/Efficiency/Solver_Rating.mat']);
 disp(['Solver Optimal Value (Original Func): ', num2str(fval_solver)]);
 disp(['Solver time: ', num2str(solve_time), ' seconds']);
-p_opt_solver = p_opt_solver'; % Ensure it's a row vector
+disp(['Solver Optimal Value (Original Func): ', num2str(fval_solver)]);
+disp(['Solver time: ', num2str(solve_time), ' seconds']);
+% p_opt_solver = p_opt_solver'; % Ensure it's a row vector
 
 % --- Initialization ---
 p_lower = max(v .* B ./ sum(abs(v),2));
@@ -328,20 +298,28 @@ if any([run_primal_dual_pdhg_fixed, run_primal_dual_pdhg_adaptive, run_adaptive_
     
     % --- 绘图部分 ---
 
+    % 绘制 Fixed PDHG 结果
+    if run_primal_dual_pdhg_fixed && isfield(results, 'pdhg_fixed') && ~isempty(results.pdhg_fixed.obj_values)
+        total_iters = results.pdhg_fixed.iter;
+        semilogy(0:total_iters-1, abs(results.pdhg_fixed.obj_values), '-<', 'DisplayName', 'PDHG Fixed', 'LineWidth', 2);
+        legend_entries{end+1} = 'PDHG Fixed';
+        all_obj_values_to_plot = [all_obj_values_to_plot; abs(results.pdhg_fixed.obj_values(:))];
+    end
+
+    % 绘制 Adaptive PDHG 结果
+    if run_primal_dual_pdhg_adaptive && isfield(results, 'pdhg_adaptive') && ~isempty(results.pdhg_adaptive.obj_values)
+        total_iters = results.pdhg_adaptive.iter;
+        semilogy(0:total_iters-1, abs(results.pdhg_adaptive.obj_values), '->', 'DisplayName', 'PDHG Adaptive', 'LineWidth', 2);
+        legend_entries{end+1} = 'PDHG Adaptive';
+        all_obj_values_to_plot = [all_obj_values_to_plot; abs(results.pdhg_adaptive.obj_values(:))];
+    end
+
     % 绘制 Adaptive GD 结果
     if run_adaptive_gd && isfield(results, 'adaptive_gd') && ~isempty(results.adaptive_gd.obj_values)
         total_iters = results.adaptive_gd.iter;
         semilogy(0:total_iters-1, abs(results.adaptive_gd.obj_values), '-^', 'DisplayName', 'Adaptive GD', 'LineWidth', 2);
         legend_entries{end+1} = 'Adaptive GD';
         all_obj_values_to_plot = [all_obj_values_to_plot; abs(results.adaptive_gd.obj_values(:))];
-    end
-    
-    % 绘制 Dual Averaging 结果
-    if run_dual_averaging && isfield(results, 'da') && ~isempty(results.da.obj_values)
-        total_iters = results.da.iter;
-        semilogy(0:total_iters-1, abs(results.da.obj_values), '-*', 'DisplayName', 'Dual Averaging', 'LineWidth', 2);
-        legend_entries{end+1} = 'Dual Averaging';
-        all_obj_values_to_plot = [all_obj_values_to_plot; abs(results.da.obj_values(:))];
     end
 
     % 绘制 Tatonnement 结果
@@ -368,6 +346,7 @@ if any([run_primal_dual_pdhg_fixed, run_primal_dual_pdhg_adaptive, run_adaptive_
         all_obj_values_to_plot = [all_obj_values_to_plot; abs(results.primal_md.obj_values(:))];
     end
 
+
     % 绘制 Adaptive MD 结果
     if run_adaptive_md && isfield(results, 'adaptive_md') && ~isempty(results.adaptive_md.obj_values)
         total_iters = results.adaptive_md.iter;
@@ -376,22 +355,15 @@ if any([run_primal_dual_pdhg_fixed, run_primal_dual_pdhg_adaptive, run_adaptive_
         all_obj_values_to_plot = [all_obj_values_to_plot; abs(results.adaptive_md.obj_values(:))];
     end
 
-    % 绘制 Fixed PDHG 结果
-    if run_primal_dual_pdhg_fixed && isfield(results, 'pdhg_fixed') && ~isempty(results.pdhg_fixed.obj_values)
-        total_iters = results.pdhg_fixed.iter;
-        semilogy(0:total_iters-1, abs(results.pdhg_fixed.obj_values), '-<', 'DisplayName', 'PDHG Fixed', 'LineWidth', 2);
+
+     % 绘制 Dual Averaging 结果
+     if run_dual_averaging && isfield(results, 'da') && ~isempty(results.da.obj_values)
+        total_iters = results.da.iter;
+        semilogy(0:total_iters, abs(results.da.obj_values), '-*', 'DisplayName', 'Dual Averaging', 'LineWidth', 2);
         legend_entries{end+1} = 'PDHG';
-        all_obj_values_to_plot = [all_obj_values_to_plot; abs(results.pdhg_fixed.obj_values(:))];
+        all_obj_values_to_plot = [all_obj_values_to_plot; abs(results.da.obj_values(:))];
     end
 
-    % 绘制 Adaptive PDHG 结果
-    if run_primal_dual_pdhg_adaptive && isfield(results, 'pdhg_adaptive') && ~isempty(results.pdhg_adaptive.obj_values)
-        total_iters = results.pdhg_adaptive.iter;
-        semilogy(0:total_iters-1, abs(results.pdhg_adaptive.obj_values), '->', 'DisplayName', 'PDHG Adaptive', 'LineWidth', 2);
-        legend_entries{end+1} = 'PDHG';
-        all_obj_values_to_plot = [all_obj_values_to_plot; abs(results.pdhg_adaptive.obj_values(:))];
-    end
-    
     % 绘制 Adaptive NAG 结果
     if run_adaptive_nag && isfield(results, 'adaptive_nag') && ~isempty(results.adaptive_nag.obj_values)
         total_iters = results.adaptive_nag.iter;
@@ -399,7 +371,7 @@ if any([run_primal_dual_pdhg_fixed, run_primal_dual_pdhg_adaptive, run_adaptive_
         legend_entries{end+1} = 'APM';
         all_obj_values_to_plot = [all_obj_values_to_plot; abs(results.adaptive_nag.obj_values(:))];
     end
-
+    
     hold off;
 
     % 自定义绘图

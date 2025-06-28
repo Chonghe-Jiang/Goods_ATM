@@ -1,5 +1,5 @@
 function [solution_x, solution_t, solution_p, solution_y, obj_values, dis_p, time, iter_total] = linear_primal_dual_pdhg_adaptive(v, B, x0, t0, p0, y0, max_outer_iter, K_inner_iter, eta_initial, omega_initial, theta, epsilon, plot_flag, p_opt_solver, fval_solver)
-    % linear_primal_dual_pdhg_adaptive - Implements PDHG with adaptive step-sizes.
+    % linear_primal_dual_pdhg_adaptive - Implements PDHG with adaptive step-sizes for eta and omega.
     % Based on the PDHG algorithm in "PDHCG: A Scalable First-Order Method..." (arXiv:2506.06258v1).
     % This version incorporates an adaptive step-size strategy for sigma and tau.
 
@@ -14,7 +14,7 @@ function [solution_x, solution_t, solution_p, solution_y, obj_values, dis_p, tim
     % K_inner_iter   - Number of inner iterations per outer loop
     % eta_initial    - Initial overall step-size
     % omega_initial  - Initial primal weight (balances primal/dual steps)
-    % theta          - Adaptation factor for omega
+    % theta          - Adaptation factor for omega and eta
     % epsilon        - Tolerance for convergence
     % plot_flag      - True to plot, false to not plot
     % p_opt_solver   - Optimal price solution from an external solver (for plotting)
@@ -119,28 +119,40 @@ function [solution_x, solution_t, solution_p, solution_y, obj_values, dis_p, tim
             end
         end % End inner loop
 
-        % --- Update Primal Weight 'omega' based on residuals ---
-        % As per the paper, this check can be done periodically (e.g., every 3 restarts)
-        if mod(outer_n, 3) == 0 && outer_n > 0
+        % --- Adaptive Step-Size and Primal Weight Update ---
+        % This check is performed after each restart cycle.
+        if mod(outer_n, 1) == 0 && outer_n > 0
             % Calculate primal residual (constraint violation)
             primal_res1 = norm(sum(x_bar_nk, 1) - 1, inf);
             primal_res2 = norm(t_bar_nk - sum(v .* x_bar_nk, 2), inf);
             r_primal = max(primal_res1, primal_res2);
 
-            % Calculate dual residual (simplified from paper's KKT conditions)
-            % This measures how far the current primal solution is from satisfying
-            % the optimality conditions for the dual variables.
+            % Calculate dual residual
             grad_L_x = p_bar_nk - v .* y_bar_nk;
-            r_dual = norm(x_bar_nk .* grad_L_x, 1) / (1 + norm(x_bar_nk,1)); % Simplified from paper
+            r_dual = norm(x_bar_nk .* grad_L_x, 1) / (1 + norm(x_bar_nk,1));
             
-            % Adjust omega
+            % Adjust omega to balance primal and dual progress
             if r_primal > (1 + theta) * r_dual
                 omega = omega / (1 - theta); % Primal residual is larger, increase primal step (decrease omega)
             elseif r_dual > (1 + theta) * r_primal
                 omega = omega * (1 - theta); % Dual residual is larger, increase dual step (increase omega)
             end
             % Enforce bounds on omega
-            omega = max(min(omega, omega_max), omega_min);
+            % omega = max(min(omega, omega_max), omega_min);
+
+            % --- NEW: Adjust and Bound ETA ---
+            % ! Check the operation here, whether it is necessary to adjust eta based on residuals.
+            % This logic was added based on the paper's description to control the overall step size.
+            % if r_primal > (1 + theta) * r_dual || r_dual > (1 + theta) * r_primal
+            %     % If residuals are imbalanced, be more conservative with the overall step size.
+            %     eta = eta * (1 - theta / 2);
+            % else
+            %     % If residuals are balanced, we can be more aggressive.
+            %     eta = eta / (1 - theta / 2);
+            % end
+            % Apply the bounds as specified in the paper
+            eta = max(0.01 * eta_initial, min(eta, 3 * eta_initial));
+            % --- END NEW LOGIC ---
         end
 
 
