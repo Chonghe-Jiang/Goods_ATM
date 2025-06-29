@@ -21,8 +21,8 @@ run_adaptive_gd = false;
 % --------------------------
 
 % Define problem parameters
-n = 1000;  % Number of rows (buyers)
-m = 1000;   % Number of columns (goods)
+n = 50;  % Number of rows (buyers)
+m = 50;   % Number of columns (goods)
 B = ones(n,1); % Budget vector (w_i in PDHG paper)
 
 % Define the folder name for caching data

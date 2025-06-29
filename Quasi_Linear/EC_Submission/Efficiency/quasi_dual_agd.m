@@ -92,6 +92,8 @@ function [solution, time, iter, obj_values, dis_agd, convergence] = quasi_dual_a
         % Check convergence
         if iter >= 2 && obj < epsilon
             convergence = true;
+            obj
+            epsilon
             break;
         end
         %%% Todo: give a rigorous definition of the phase changing phenomena 

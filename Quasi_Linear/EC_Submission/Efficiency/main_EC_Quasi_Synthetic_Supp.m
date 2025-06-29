@@ -11,8 +11,8 @@ m = 500;   % Number of columns
 B = ones(n, 1);  % Random B vector
 
 % Todo: Change the threshold
-max_iter = 25000;
-max_iter_adaptive = 4500;
+max_iter = 20000;
+max_iter_adaptive = 4000;
 epsilon = 1e-4; 
 plot_flag = true;
 
@@ -115,7 +115,7 @@ hold on;
 semilogy(x_subgrad_adaptive, abs(obj_values_sub_adaptive), '-d', 'DisplayName', 'Adaptive Tatonnement', 'LineWidth', 2); % Plot Adaptive Subgradient
 semilogy(x_md, abs(obj_values_md), '-d', 'DisplayName', 'Mirror Descent', 'LineWidth', 2); % Plot Mirror Descent
 semilogy(x_md_adaptive, abs(obj_values_md_adaptive), '-d', 'DisplayName', 'Adaptive MD', 'LineWidth', 2); % Plot Adaptive MD
-semilogy(x_adaptive, abs(obj_values_adaptive), '-d', 'DisplayName', 'ATM', 'LineWidth', 2); % Plot Adaptive AGD
+semilogy(x_adaptive, abs(obj_values_adaptive), '-d', 'DisplayName', 'APM', 'LineWidth', 2); % Plot Adaptive AGD
 hold off;
 
 % Set font sizes and other properties
